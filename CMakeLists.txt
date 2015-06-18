@@ -30,9 +30,8 @@ find_package(Boost
   COMPONENTS serialization)
 include_directories (${Boost_INCLUDE_DIRS})
 
-find_package (RLog REQUIRED)
-add_definitions (-DRLOG_COMPONENT="encfs")
-include_directories (${RLOG_INCLUDE_DIR})
+find_package (GLog REQUIRED)
+include_directories (${GLOG_INCLUDE_DIRS})
 
 find_program (POD2MAN pod2man)
 include (FindGettext)
@@ -92,6 +91,7 @@ set(SOURCE_FILES
   encfs/Context.cpp
   encfs/DirNode.cpp
   encfs/encfs.cpp
+  encfs/Error.cpp
   encfs/FileIO.cpp
   encfs/FileNode.cpp
   encfs/FileUtils.cpp
@@ -114,7 +114,7 @@ target_link_libraries(encfs
   ${FUSE_LIBRARIES}
   ${OPENSSL_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${RLOG_LIBRARIES}
+  ${GLOG_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
 )
 install (TARGETS encfs DESTINATION lib)
