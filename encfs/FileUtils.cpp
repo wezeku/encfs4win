@@ -31,8 +31,7 @@
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/split_free.hpp>
 #include <fcntl.h>
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -54,6 +53,7 @@
 #include "ConfigVar.h"
 #include "Context.h"
 #include "DirNode.h"
+#include "Error.h"
 #include "FSConfig.h"
 #include "FileUtils.h"
 #include "Interface.h"
@@ -65,12 +65,7 @@
 #include "intl/gettext.h"
 #include "readpassphrase.h"
 
-// disable rlog section grouping for this file.. seems to cause problems
-#undef RLOG_SECTION
-#define RLOG_SECTION
-
 using namespace rel;
-using namespace rlog;
 using namespace std;
 using gnu::autosprintf;
 namespace serial = boost::serialization;

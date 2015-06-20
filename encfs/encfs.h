@@ -22,7 +22,7 @@
 #define _encfs_incl_
 
 #include <fuse.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <sys/types.h>
 #include <unistd.h>
 

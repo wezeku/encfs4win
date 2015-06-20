@@ -23,8 +23,7 @@
 #include <fcntl.h>
 #include <inttypes.h>
 #include <openssl/sha.h>
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <cerrno>
@@ -32,6 +31,7 @@
 #include "BlockFileIO.h"
 #include "Cipher.h"
 #include "CipherKey.h"
+#include "Error.h"
 #include "FileIO.h"
 
 /*

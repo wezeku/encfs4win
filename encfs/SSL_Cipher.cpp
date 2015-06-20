@@ -26,7 +26,7 @@
 #include <openssl/rand.h>
 #include <pthread.h>
 #include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <cstring>

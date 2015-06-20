@@ -21,7 +21,7 @@
 #include "StreamNameIO.h"
 
 #include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <cstring>
 
 #include "Cipher.h"

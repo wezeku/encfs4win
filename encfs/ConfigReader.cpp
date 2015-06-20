@@ -21,7 +21,7 @@
 #include "ConfigReader.h"
 
 #include <fcntl.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <cstring>

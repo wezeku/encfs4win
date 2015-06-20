@@ -21,7 +21,7 @@
 #include <rlog/RLogChannel.h>
 #include <rlog/StdioNode.h>
 #include <rlog/SyslogNode.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/time.h>

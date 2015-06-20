@@ -35,22 +35,15 @@
 #include <sys/fsuid.h>
 #endif
 
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <cstring>
 
+#include "Error.h"
 #include "Context.h"
 #include "Mutex.h"
 
-namespace rlog {
-class RLogChannel;
-}  // namespace rlog
-
 using namespace std;
 using namespace rel;
-using namespace rlog;
-
-static RLogChannel *Info = DEF_CHANNEL("info/DirNode", Log_Info);
 
 class DirDeleter {
  public:

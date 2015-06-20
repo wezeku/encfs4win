@@ -22,7 +22,7 @@
 
 #include <inttypes.h>
 #include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <sys/stat.h>
 #include <cstring>
 

@@ -20,7 +20,7 @@
 
 #include "ConfigVar.h"
 
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <cstring>
 
 using namespace rlog;

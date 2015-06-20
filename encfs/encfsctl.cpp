@@ -18,9 +18,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <limits.h>
-#include <rlog/RLogChannel.h>
-#include <rlog/StdioNode.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +49,6 @@
 #define PATH_MAX 4096
 #endif
 
-using namespace rlog;
 using namespace std;
 using gnu::autosprintf;
 

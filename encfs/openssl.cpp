@@ -22,7 +22,7 @@
 
 #include <openssl/crypto.h>
 #include <pthread.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <stdlib.h>
 
 #define NO_DES

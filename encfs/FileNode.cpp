@@ -28,7 +28,7 @@
 #include <sys/fsuid.h>
 #endif
 
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <cstring>
 
 #include "CipherFileIO.h"

@@ -20,7 +20,7 @@
 
 #include "Interface.h"
 
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 
 #include "ConfigVar.h"
 

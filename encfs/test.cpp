@@ -19,7 +19,7 @@
 #include <rlog/Error.h>
 #include <rlog/RLogChannel.h>
 #include <rlog/StdioNode.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <time.h>
 #include <unistd.h>
 #include <cstdlib>

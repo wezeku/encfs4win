@@ -41,24 +41,17 @@
 #include <attr/xattr.h>
 #endif
 
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include <glog/logging.h>
 #include <functional>
 #include <string>
 #include <vector>
 
 #include "Context.h"
 #include "DirNode.h"
+#include "Error.h"
 #include "FileNode.h"
 #include "FileUtils.h"
 #include "fuse.h"
-
-namespace rel {
-class Lock;
-}  // namespace rel
-namespace rlog {
-class RLogChannel;
-}  // namespace rlog
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -68,7 +61,6 @@ class RLogChannel;
 
 using namespace std;
 using namespace std::placeholders;
-using namespace rlog;
 using rel::Lock;
 
 #define GET_FN(ctx, finfo) ctx->getNode((void *)(uintptr_t) finfo->fh)
