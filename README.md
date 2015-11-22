@@ -26,8 +26,5 @@ For more info, see:
 I will try to keep this updated with the [EncFS project](https://github.com/vgough/encfs) 
 as changes come in upstream.  
 
-As of now, symbolic links on the encrypted filesystem have not yet been implemented 
-(they were also not implemented in the original encfs4win).  
-
 EncFS4win has been tested with the latest release of Dokan (v0.7.4), but has not yet been tested 
 with the release candidates (v0.8.x).  
