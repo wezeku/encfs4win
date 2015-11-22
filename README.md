@@ -1,19 +1,16 @@
-# EncFS - an Encrypted Filesystem
-
-_Build Status_
- - Drone: [![Build Status](http://104.236.164.205:8080/api/badge/github.com/vgough/encfs/status.svg?branch=master)](http://104.236.164.205:8080/github.com/vgough/encfs)
- - Circle: [![Circle CI](https://circleci.com/gh/vgough/encfs.svg?style=svg)](https://circleci.com/gh/vgough/encfs)
+# encfs4win - Windows port of EncFS 
 
 ## About
 
-EncFS provides an encrypted filesystem in user-space. It runs in userspace,
-using the FUSE library for the filesystem interface. EncFS is open source
-software, licensed under the LGPL.
+EncFS4win is a revival of the original encfs4win project, but has been brought 
+up-to-date with recent changes done to the EncFS project.  The original encfs4win 
+was based on EncFS v1.7.4, which was shown to have some [security issues](https://defuse.ca/audits/encfs.htm). 
+[Updates to EncFS](https://github.com/vgough/encfs) have been done recently to fix many of these issues, and the goal of 
+this project is to port these modernizations to Windows. 
 
-EncFS is now over 10 years old (first release in 2003).  It was written because
-older NFS-based encrypted filesystems such as CFS had not kept pace with Linux
-development.  When FUSE became available, I wrote a CFS replacement for my own
-use and released the first version to Open Source in 2003.
+EncFS provides an encrypted filesystem in user-space. It runs in userspace,
+using the [Dokan library](https://github.com/dokan-dev/dokany) for the filesystem interface. EncFS is open source
+software, licensed under the LGPL.
 
 EncFS encrypts individual files, by translating all requests for the virtual
 EncFS filesystem into the equivalent encrypted operations on the raw
@@ -26,52 +23,11 @@ For more info, see:
 
 ## Status
 
-Over the last 10 years, a number of good alternatives have grown up.  Computing
-power has increased to the point where it is reasonable to encrypt the entire
-filesystem of personal computers (and even mobile phones!).  On Linux, ecryptfs
-provides a nice dynamically mountable encrypted home directory, and is well
-integrated in distributions I use, such as Ubuntu.
+I will try to keep this updated with the [EncFS project](https://github.com/vgough/encfs) 
+as changes come in upstream.  
 
-EncFS has been dormant for a while.  I've started cleaning up in order to try
-and provide a better base for a version 2, but whether EncFS flowers again
-depends upon community interest.  In order to make it easier for anyone to
-contribute, it is moving a new home on Github.  So if you're interested in
-EncFS, please dive in!
+As of now, symbolic links on the encrypted filesystem have not yet been implemented 
+(they were also not implemented in the original encfs4win).  
 
-## Unique Features
-
-EncFS has a few features still not found anywhere else (as of Dec 2014)
-that may be interesing to you:
-
-### Reverse mode
-
-`encfs --reverse` provides an encrypted view of an unencrypted folder.
-This enables encrypted remote backups using standard tools like rsync.
-
-### Fast on classical HDDs
-
-EncFS is typically *much* faster than ecryptfs for stat()-heavy workloads
-when the backing device is a classical hard disk.
-This is because ecryptfs has to to read each file header to determine
-the file size - EncFS does not. This is one additional seek for each
-stat.
-See [PERFORMANCE.md](PERFORMANCE.md) for detailed benchmarks on
-HDD, SSD and ramdisk.
-
-### Works on top of network filesystems
-
-EncFS works on network file systems (NFS, CIFS...), while ecryptfs
-is known to still have [problems][1].
-
-## Development
-
-The master branch contains the latest stable codebase.  This is where bug fixes
-and improvments should go.
-
-The [dev](https://github.com/vgough/encfs/tree/dev) branch contains experimental
-work, some of which may be back-ported to the master branch when it is stable. The
-dev branch is not stable, and there is no guarantee of backward compatibility
-between changes.
-
-
-[1]: https://bugs.launchpad.net/ecryptfs/+bug/277578
+EncFS4win has been tested with the latest release of Dokan (v0.7.4), but has not yet been tested 
+with the release candidates (v0.8.x).  
