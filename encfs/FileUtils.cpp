@@ -25,18 +25,18 @@
 #define _BSD_SOURCE  // pick up setenv on RH7.3
 
 #include <boost/version.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/serialization/binary_object.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/split_free.hpp>
 #include <fcntl.h>
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
-#include <sys/socket.h>
+#include "rlog/rlog.h"
+//#include <sys/socket.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
-#include <unistd.h>
+//#include <sys/wait.h>
+#include "unistd.h"
 #include <cctype>
 #include <cerrno>
 #include <cstdio>
@@ -66,13 +66,15 @@
 #include "readpassphrase.h"
 
 // disable rlog section grouping for this file.. seems to cause problems
+#undef min
+#undef max
 #undef RLOG_SECTION
 #define RLOG_SECTION
 
 using namespace rel;
-using namespace rlog;
 using namespace std;
 using gnu::autosprintf;
+namespace fs = boost::filesystem;
 namespace serial = boost::serialization;
 
 static const int DefaultBlockSize = 1024;
@@ -248,7 +250,7 @@ EncFS_Root::~EncFS_Root() {}
 
 bool fileExists(const char *fileName) {
   struct stat buf;
-  if (!lstat(fileName, &buf)) {
+  if (!unix::lstat(fileName, &buf)) {
     return true;
   } else {
     // XXX show perror?
@@ -258,7 +260,7 @@ bool fileExists(const char *fileName) {
 
 bool isDirectory(const char *fileName) {
   struct stat buf;
-  if (!lstat(fileName, &buf)) {
+  if (!unix::lstat(fileName, &buf)) {
     return S_ISDIR(buf.st_mode);
   } else {
     return false;
@@ -266,9 +268,12 @@ bool isDirectory(const char *fileName) {
 }
 
 bool isAbsolutePath(const char *fileName) {
-  if (fileName && fileName[0] != '\0' && fileName[0] == '/')
+    if (!fileName || fileName[0] == '\0')
+	return false;
+    if (isalpha((unsigned char) fileName[0]) && fileName[1] == ':')
     return true;
-  else
+    if (strchr("\\/", fileName[0]) && fileName[1] && strchr("\\/", fileName[1]))
+    return true;
     return false;
 }
 
@@ -313,7 +318,7 @@ bool userAllowMkdir(int promptno, const char *path, mode_t mode) {
   res = fgets(answer, sizeof(answer), stdin);
 
   if (res != 0 && toupper(answer[0]) == 'Y') {
-    int result = mkdir(path, mode);
+    int result = unix::mkdir(path, mode);
     if (result < 0) {
       perror(_("Unable to create directory: "));
       return false;
@@ -337,8 +342,8 @@ ConfigType readConfig_load(ConfigInfo *nm, const char *path,
         config->cfgType = nm->type;
         return nm->type;
       }
-    } catch (rlog::Error &err) {
-      err.log(_RLWarningChannel);
+    }
+    catch (...) {
     }
 
     rError(_("Found config file %s, but failed to load - exiting"), path);
@@ -390,7 +395,7 @@ bool readV6Config(const char *configFile, const shared_ptr<EncFSConfig> &config,
                   ConfigInfo *info) {
   (void)info;
 
-  ifstream st(configFile);
+  fs::ifstream st(configFile);
   if (st.is_open()) {
     try {
       boost::archive::xml_iarchive ia(st);
@@ -452,8 +457,8 @@ bool readV5Config(const char *configFile, const shared_ptr<EncFSConfig> &config,
       config->blockMACRandBytes = cfgRdr["blockMACRandBytes"].readInt(0);
 
       ok = true;
-    } catch (rlog::Error &err) {
-      err.log(_RLWarningChannel);
+    }
+    catch (...) {
       rDebug("Error parsing data in config file %s", configFile);
       ok = false;
     }
@@ -492,8 +497,8 @@ bool readV4Config(const char *configFile, const shared_ptr<EncFSConfig> &config,
       config->chainedNameIV = false;
 
       ok = true;
-    } catch (rlog::Error &err) {
-      err.log(_RLWarningChannel);
+    }
+    catch (...) {
       rDebug("Error parsing config file %s", configFile);
       ok = false;
     }
@@ -518,8 +523,8 @@ bool saveConfig(ConfigType type, const string &rootDir,
 
       try {
         ok = (*nm->saveFunc)(path.c_str(), config);
-      } catch (rlog::Error &err) {
-        err.log(_RLWarningChannel);
+      }
+      catch (...) {
         ok = false;
       }
       break;
@@ -532,7 +537,7 @@ bool saveConfig(ConfigType type, const string &rootDir,
 
 bool writeV6Config(const char *configFile,
                    const shared_ptr<EncFSConfig> &config) {
-  ofstream st(configFile);
+  fs::ofstream st(configFile);
   if (!st.is_open()) return false;
 
   st << *config;
@@ -975,7 +980,7 @@ RootPtr createV6Config(EncFS_Context *ctx, const shared_ptr<EncFS_Opts> &opts) {
     if (annotate) cerr << "$PROMPT$ config_option" << endl;
 
     char *res = fgets(answer, sizeof(answer), stdin);
-    (void)res;
+    //(void)res;
     cout << "\n";
   }
 
@@ -1091,7 +1096,7 @@ RootPtr createV6Config(EncFS_Context *ctx, const shared_ptr<EncFS_Opts> &opts) {
   shared_ptr<EncFSConfig> config(new EncFSConfig);
 
   config->cfgType = Config_V6;
-  config->cipherIface = cipher->interface();
+  config->cipherIface = cipher->_interface();
   config->keySize = keySize;
   config->blockSize = blockSize;
   config->nameIface = nameIOIface;
@@ -1144,8 +1149,7 @@ RootPtr createV6Config(EncFS_Context *ctx, const shared_ptr<EncFS_Opts> &opts) {
   if (useStdin) {
     if (annotate) cerr << "$PROMPT$ new_passwd" << endl;
     userKey = config->getUserKey(useStdin);
-  } else if (!passwordProgram.empty())
-    userKey = config->getUserKey(passwordProgram, rootDir);
+  } 
   else
     userKey = config->getNewUserKey();
 
@@ -1208,8 +1212,8 @@ void showFSInfo(const shared_ptr<EncFSConfig> &config) {
       cout << _(" (NOT supported)\n");
     else {
       // if we're using a newer interface, show the version number
-      if (config->cipherIface != cipher->interface()) {
-        Interface iface = cipher->interface();
+      if (config->cipherIface != cipher->_interface()) {
+        Interface iface = cipher->_interface();
         // xgroup(diag)
         cout << autosprintf(_(" (using %i:%i:%i)\n"), iface.current(),
                             iface.revision(), iface.age());
@@ -1232,8 +1236,8 @@ void showFSInfo(const shared_ptr<EncFSConfig> &config) {
       cout << _(" (NOT supported)\n");
     } else {
       // if we're using a newer interface, show the version number
-      if (config->nameIface != nameCoder->interface()) {
-        Interface iface = nameCoder->interface();
+      if (config->nameIface != nameCoder->_Interface()) {
+        Interface iface = nameCoder->_Interface();
         cout << autosprintf(_(" (using %i:%i:%i)\n"), iface.current(),
                             iface.revision(), iface.age());
       } else
@@ -1374,6 +1378,7 @@ CipherKey EncFSConfig::getUserKey(bool useStdin) {
   return userKey;
 }
 
+#if 0
 std::string readPassword(int FD) {
   char buffer[1024];
   string result;
@@ -1472,6 +1477,7 @@ CipherKey EncFSConfig::getUserKey(const std::string &passProg,
 
   return result;
 }
+#endif
 
 CipherKey EncFSConfig::getNewUserKey() {
   CipherKey userKey;
@@ -1545,8 +1551,7 @@ RootPtr initFS(EncFS_Context *ctx, const shared_ptr<EncFS_Opts> &opts) {
       rDebug("useStdin: %i", opts->useStdin);
       if (opts->annotate) cerr << "$PROMPT$ passwd" << endl;
       userKey = config->getUserKey(opts->useStdin);
-    } else
-      userKey = config->getUserKey(opts->passwordProgram, opts->rootDir);
+    } 
 
     if (!userKey) return rootInfo;
 

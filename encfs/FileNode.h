@@ -22,7 +22,7 @@
 #define _FileNode_incl_
 
 #include <inttypes.h>
-#include <pthread.h>
+#include "pthread.h"
 #include <stdint.h>
 #include <sys/types.h>
 #include <memory>

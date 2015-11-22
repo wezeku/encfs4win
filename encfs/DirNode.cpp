@@ -18,11 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <pthread.h>
+#include "pthread.h"
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
-#include <utime.h>
+#include "unistd.h"
+//#include <utime.h>
 #include <cerrno>
 #include <cstdio>
 
@@ -35,29 +35,23 @@
 #include <sys/fsuid.h>
 #endif
 
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <cstring>
 
 #include "Context.h"
 #include "Mutex.h"
 
-namespace rlog {
-class RLogChannel;
-}  // namespace rlog
 
 using namespace std;
 using namespace rel;
-using namespace rlog;
 
-static RLogChannel *Info = DEF_CHANNEL("info/DirNode", Log_Info);
 
 class DirDeleter {
  public:
-  void operator()(DIR *d) { ::closedir(d); }
+  void operator()(unix::DIR *d) { unix::closedir(d); }
 };
 
-DirTraverse::DirTraverse(const shared_ptr<DIR> &_dirPtr, uint64_t _iv,
+DirTraverse::DirTraverse(const shared_ptr<unix::DIR> &_dirPtr, uint64_t _iv,
                          const shared_ptr<NameIO> &_naming)
     : dir(_dirPtr), iv(_iv), naming(_naming) {}
 
@@ -78,16 +72,18 @@ DirTraverse::~DirTraverse() {
   naming.reset();
 }
 
-static bool _nextName(struct dirent *&de, const shared_ptr<DIR> &dir,
+static bool _nextName(struct unix::dirent *&de, const shared_ptr<unix::DIR> &dir,
                       int *fileType, ino_t *inode) {
-  de = ::readdir(dir.get());
+  de = unix::readdir(dir.get());
 
   if (de) {
     if (fileType) {
 #if defined(_DIRENT_HAVE_D_TYPE) || defined(__FreeBSD__) || defined(__APPLE__)
       *fileType = de->d_type;
 #else
+#ifndef _WIN32
 #warning "struct dirent.d_type not supported"
+#endif
       *fileType = 0;
 #endif
     }
@@ -100,12 +96,12 @@ static bool _nextName(struct dirent *&de, const shared_ptr<DIR> &dir,
 }
 
 std::string DirTraverse::nextPlaintextName(int *fileType, ino_t *inode) {
-  struct dirent *de = 0;
+  struct unix::dirent *de = 0;
   while (_nextName(de, dir, fileType, inode)) {
     try {
       uint64_t localIv = iv;
       return naming->decodePath(de->d_name, &localIv);
-    } catch (rlog::Error &ex) {
+    } catch (...) {
       // .. .problem decoding, ignore it and continue on to next name..
       rDebug("error decoding filename: %s", de->d_name);
     }
@@ -115,14 +111,14 @@ std::string DirTraverse::nextPlaintextName(int *fileType, ino_t *inode) {
 }
 
 std::string DirTraverse::nextInvalid() {
-  struct dirent *de = 0;
+  struct unix::dirent *de = 0;
   // find the first name which produces a decoding error...
   while (_nextName(de, dir, (int *)0, (ino_t *)0)) {
     try {
       uint64_t localIv = iv;
       naming->decodePath(de->d_name, &localIv);
       continue;
-    } catch (rlog::Error &ex) {
+    } catch (...) {
       return string(de->d_name);
     }
   }
@@ -185,13 +181,13 @@ bool RenameOp::apply() {
              last->newCName.c_str());
 
       struct stat st;
-      bool preserve_mtime = ::stat(last->oldCName.c_str(), &st) == 0;
+      bool preserve_mtime = unix::stat(last->oldCName.c_str(), &st) == 0;
 
       // internal node rename..
       dn->renameNode(last->oldPName.c_str(), last->newPName.c_str());
 
       // rename on disk..
-      if (::rename(last->oldCName.c_str(), last->newCName.c_str()) == -1) {
+      if (unix::rename(last->oldCName.c_str(), last->newCName.c_str()) == -1) {
         rWarning("Error renaming %s: %s", last->oldCName.c_str(),
                  strerror(errno));
         dn->renameNode(last->newPName.c_str(), last->oldPName.c_str(), false);
@@ -202,15 +198,14 @@ bool RenameOp::apply() {
         struct utimbuf ut;
         ut.actime = st.st_atime;
         ut.modtime = st.st_mtime;
-        ::utime(last->newCName.c_str(), &ut);
+        unix::utime(last->newCName.c_str(), &ut);
       }
 
       ++last;
     }
 
     return true;
-  } catch (rlog::Error &err) {
-    err.log(_RLWarningChannel);
+  } catch (...) {
     return false;
   }
 }
@@ -234,11 +229,10 @@ void RenameOp::undo() {
     rDebug("undo: renaming %s -> %s", it->newCName.c_str(),
            it->oldCName.c_str());
 
-    ::rename(it->newCName.c_str(), it->oldCName.c_str());
+    unix::rename(it->newCName.c_str(), it->oldCName.c_str());
     try {
       dn->renameNode(it->newPName.c_str(), it->oldPName.c_str(), false);
-    } catch (rlog::Error &err) {
-      err.log(_RLWarningChannel);
+    } catch (...) {
       // continue on anyway...
     }
     ++undoCount;
@@ -336,9 +330,8 @@ string DirNode::plainPath(const char *cipherPath_) {
 
     // Default.
     return naming->decodePath(cipherPath_);
-  } catch (rlog::Error &err) {
-    rError("decode err: %s", err.message());
-    err.log(_RLWarningChannel);
+  } catch (std::string err) {
+    rError("decode err: %s", err);
 
     return string();
   }
@@ -354,9 +347,8 @@ string DirNode::relativeCipherPath(const char *plaintextPath) {
     }
 
     return naming->encodePath(plaintextPath);
-  } catch (rlog::Error &err) {
-    rError("encode err: %s", err.message());
-    err.log(_RLWarningChannel);
+  } catch (std::string err) {
+    rError("encode err: %s", err);
 
     return string();
   }
@@ -366,21 +358,20 @@ DirTraverse DirNode::openDir(const char *plaintextPath) {
   string cyName = rootDir + naming->encodePath(plaintextPath);
   // rDebug("openDir on %s", cyName.c_str() );
 
-  DIR *dir = ::opendir(cyName.c_str());
+  unix::DIR *dir = unix::opendir(cyName.c_str());
   if (dir == NULL) {
     rDebug("opendir error %s", strerror(errno));
-    return DirTraverse(shared_ptr<DIR>(), 0, shared_ptr<NameIO>());
+    return DirTraverse(shared_ptr<unix::DIR>(), 0, shared_ptr<NameIO>());
   } else {
-    shared_ptr<DIR> dp(dir, DirDeleter());
+    shared_ptr<unix::DIR> dp(dir, DirDeleter());
 
     uint64_t iv = 0;
     // if we're using chained IV mode, then compute the IV at this
     // directory level..
     try {
       if (naming->getChainedNameIV()) naming->encodePath(plaintextPath, &iv);
-    } catch (rlog::Error &err) {
-      rError("encode err: %s", err.message());
-      err.log(_RLWarningChannel);
+    } catch (std::string err) {
+      rError("encode err: %s", err);
     }
     return DirTraverse(dp, iv, naming);
   }
@@ -402,12 +393,12 @@ bool DirNode::genRenameList(list<RenameEl> &renameList, const char *fromP,
 
   // generate the real destination path, where we expect to find the files..
   rDebug("opendir %s", sourcePath.c_str());
-  shared_ptr<DIR> dir =
-      shared_ptr<DIR>(opendir(sourcePath.c_str()), DirDeleter());
+  shared_ptr<unix::DIR> dir =
+      shared_ptr<unix::DIR>(unix::opendir(sourcePath.c_str()), DirDeleter());
   if (!dir) return false;
 
-  struct dirent *de = NULL;
-  while ((de = ::readdir(dir.get())) != NULL) {
+  struct unix::dirent *de = NULL;
+  while ((de = unix::readdir(dir.get())) != NULL) {
     // decode the name using the oldIV
     uint64_t localIV = fromIV;
     string plainName;
@@ -421,7 +412,7 @@ bool DirNode::genRenameList(list<RenameEl> &renameList, const char *fromP,
 
     try {
       plainName = naming->decodePath(de->d_name, &localIV);
-    } catch (rlog::Error &ex) {
+    } catch (...) {
       // if filename can't be decoded, then ignore it..
       continue;
     }
@@ -466,12 +457,11 @@ bool DirNode::genRenameList(list<RenameEl> &renameList, const char *fromP,
       rDebug("adding file %s to rename list", oldFull.c_str());
 
       renameList.push_back(ren);
-    } catch (rlog::Error &err) {
+    } catch (...) {
       // We can't convert this name, because we don't have a valid IV for
       // it (or perhaps a valid key).. It will be inaccessible..
       rWarning("Aborting rename: error on file: %s",
                fromCPart.append(1, '/').append(de->d_name).c_str());
-      err.log(_RLDebugChannel);
 
       // abort.. Err on the side of safety and disallow rename, rather
       // then loosing files..
@@ -509,15 +499,19 @@ int DirNode::mkdir(const char *plaintextPath, mode_t mode, uid_t uid,
   rLog(Info, "mkdir on %s", cyName.c_str());
 
   // if uid or gid are set, then that should be the directory owner
+#if 0
   int olduid = -1;
   int oldgid = -1;
   if (uid != 0) olduid = setfsuid(uid);
   if (gid != 0) oldgid = setfsgid(gid);
+#endif
 
-  int res = ::mkdir(cyName.c_str(), mode);
+  int res = unix::mkdir(cyName.c_str(), mode);
 
+#if 0
   if (olduid >= 0) setfsuid(olduid);
   if (oldgid >= 0) setfsgid(oldgid);
+#endif
 
   if (res == -1) {
     int eno = errno;
@@ -559,10 +553,10 @@ int DirNode::rename(const char *fromPlaintext, const char *toPlaintext) {
   int res = 0;
   try {
     struct stat st;
-    bool preserve_mtime = ::stat(fromCName.c_str(), &st) == 0;
+    bool preserve_mtime = unix::stat(fromCName.c_str(), &st) == 0;
 
     renameNode(fromPlaintext, toPlaintext);
-    res = ::rename(fromCName.c_str(), toCName.c_str());
+    res = unix::rename(fromCName.c_str(), toCName.c_str());
 
     if (res == -1) {
       // undo
@@ -574,11 +568,10 @@ int DirNode::rename(const char *fromPlaintext, const char *toPlaintext) {
       struct utimbuf ut;
       ut.actime = st.st_atime;
       ut.modtime = st.st_mtime;
-      ::utime(toCName.c_str(), &ut);
+      unix::utime(toCName.c_str(), &ut);
     }
-  } catch (rlog::Error &err) {
+  } catch (...) {
     // exception from renameNode, just show the error and continue..
-    err.log(_RLWarningChannel);
     res = -EIO;
   }
 
@@ -605,11 +598,14 @@ int DirNode::link(const char *from, const char *to) {
   if (fsConfig->config->externalIVChaining) {
     rLog(Info, "hard links not supported with external IV chaining!");
   } else {
+	  res = -ENOSYS;
+#if 0
     res = ::link(fromCName.c_str(), toCName.c_str());
     if (res == -1)
       res = -errno;
     else
       res = 0;
+#endif
   }
 
   return res;
@@ -701,6 +697,7 @@ int DirNode::unlink(const char *plaintextName) {
   Lock _lock(mutex);
 
   int res = 0;
+#if 0
   if (ctx && ctx->lookupNode(plaintextName)) {
     // If FUSE is running with "hard_remove" option where it doesn't
     // hide open files for us, then we can't allow an unlink of an open
@@ -710,9 +707,11 @@ int DirNode::unlink(const char *plaintextName) {
         "is probably in effect",
         cyName.c_str());
     res = -EBUSY;
-  } else {
+  } else
+#endif
+  {
     string fullName = rootDir + cyName;
-    res = ::unlink(fullName.c_str());
+    res = unix::unlink(fullName.c_str());
     if (res == -1) {
       res = -errno;
       rDebug("unlink error: %s", strerror(errno));

@@ -20,8 +20,6 @@
 
 #include "BlockNameIO.h"
 
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
 #include <cstring>
 
 #include "Cipher.h"
@@ -30,14 +28,10 @@
 #include "base64.h"
 #include "intl/gettext.h"
 
-namespace rlog {
-class RLogChannel;
-}  // namespace rlog
+#include "rlog/rlog.h"
 
-using namespace rlog;
+
 using namespace rel;
-
-static RLogChannel *Info = DEF_CHANNEL("info/nameio", Log_Info);
 
 static shared_ptr<NameIO> NewBlockNameIO(const Interface &iface,
                                          const shared_ptr<Cipher> &cipher,
@@ -94,9 +88,9 @@ static bool BlockIO32_registered = NameIO::Register(
 Interface BlockNameIO::CurrentInterface(bool caseSensitive) {
   // implement major version 4 plus support for two prior versions
   if (caseSensitive)
-    return Interface("nameio/block32", 4, 0, 2);
+    return rel::Interface("nameio/block32", 4, 0, 2);
   else
-    return Interface("nameio/block", 4, 0, 2);
+    return rel::Interface("nameio/block", 4, 0, 2);
 }
 
 BlockNameIO::BlockNameIO(const rel::Interface &iface,
@@ -113,7 +107,7 @@ BlockNameIO::BlockNameIO(const rel::Interface &iface,
 
 BlockNameIO::~BlockNameIO() {}
 
-Interface BlockNameIO::interface() const {
+Interface BlockNameIO::_Interface() const {
   return CurrentInterface(_caseSensitive);
 }
 

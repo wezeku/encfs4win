@@ -23,9 +23,9 @@
 #endif
 #include <fcntl.h>
 #include <inttypes.h>
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <sys/stat.h>
-#include <unistd.h>
+#include "unistd.h"
 #include <cerrno>
 #include <cstring>
 
@@ -65,12 +65,12 @@ RawFileIO::~RawFileIO() {
   swap(_fd, fd);
   swap(_oldfd, oldfd);
 
-  if (_oldfd != -1) close(_oldfd);
+  if (_oldfd != -1) unix::close(_oldfd);
 
-  if (_fd != -1) close(_fd);
+  if (_fd != -1) unix::close(_fd);
 }
 
-rel::Interface RawFileIO::interface() const { return RawFileIO_iface; }
+rel::Interface RawFileIO::_interface() const { return RawFileIO_iface; }
 
 /*
     Workaround for opening a file for write when permissions don't allow.
@@ -83,11 +83,11 @@ static int open_readonly_workaround(const char *path, int flags) {
   int fd = -1;
   struct stat stbuf;
   memset(&stbuf, 0, sizeof(struct stat));
-  if (lstat(path, &stbuf) != -1) {
+  if (unix::lstat(path, &stbuf) != -1) {
     // make sure user has read/write permission..
-    chmod(path, stbuf.st_mode | 0600);
-    fd = ::open(path, flags);
-    chmod(path, stbuf.st_mode);
+	unix::chmod(path, stbuf.st_mode | 0600);
+    fd = ::my_open(path, flags);
+	unix::chmod(path, stbuf.st_mode);
   } else {
     rInfo("can't stat file %s", path);
   }
@@ -121,10 +121,12 @@ int RawFileIO::open(int flags) {
 #if defined(O_LARGEFILE)
     if (flags & O_LARGEFILE) finalFlags |= O_LARGEFILE;
 #else
+#  ifndef _WIN32
 #warning O_LARGEFILE not supported
+#  endif
 #endif
 
-    int newFd = ::open(name.c_str(), finalFlags);
+    int newFd = ::my_open(name.c_str(), finalFlags);
 
     rDebug("open file with flags %i, result = %i", finalFlags, newFd);
 
@@ -156,7 +158,7 @@ int RawFileIO::open(int flags) {
 }
 
 int RawFileIO::getAttr(struct stat *stbuf) const {
-  int res = lstat(name.c_str(), stbuf);
+  int res = unix::lstat(name.c_str(), stbuf);
   int eno = errno;
 
   if (res < 0) rInfo("getAttr error on %s: %s", name.c_str(), strerror(eno));
@@ -172,7 +174,7 @@ off_t RawFileIO::getSize() const {
   if (!knownSize) {
     struct stat stbuf;
     memset(&stbuf, 0, sizeof(struct stat));
-    int res = lstat(name.c_str(), &stbuf);
+    int res = unix::lstat(name.c_str(), &stbuf);
 
     if (res == 0) {
       const_cast<RawFileIO *>(this)->fileSize = stbuf.st_size;
@@ -188,7 +190,7 @@ off_t RawFileIO::getSize() const {
 ssize_t RawFileIO::read(const IORequest &req) const {
   rAssert(fd >= 0);
 
-  ssize_t readSize = pread(fd, req.data, req.dataLen, req.offset);
+  ssize_t readSize = unix::pread(fd, req.data, req.dataLen, req.offset);
 
   if (readSize < 0) {
     rInfo("read failed at offset %" PRIi64 " for %i bytes: %s", req.offset,
@@ -208,7 +210,7 @@ bool RawFileIO::write(const IORequest &req) {
   off_t offset = req.offset;
 
   while (bytes && retrys > 0) {
-    ssize_t writeSize = ::pwrite(fd, buf, bytes, offset);
+    ssize_t writeSize = unix::pwrite(fd, buf, bytes, offset);
 
     if (writeSize < 0) {
       knownSize = false;
@@ -242,12 +244,13 @@ int RawFileIO::truncate(off_t size) {
   int res;
 
   if (fd >= 0 && canWrite) {
-    res = ::ftruncate(fd, size);
+    res = unix::ftruncate(fd, size);
 #if !defined(__FreeBSD__) && !defined(__APPLE__)
-    ::fdatasync(fd);
+	unix::fdatasync(fd);
 #endif
   } else
-    res = ::truncate(name.c_str(), size);
+    res = unix::truncate(name.c_str(), size);
+
 
   if (res < 0) {
     int eno = errno;

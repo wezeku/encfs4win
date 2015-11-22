@@ -34,6 +34,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern "C" int vasprintf(char **ret, const char *fmt, va_list ap);
+
 namespace gnu {
 
 /* Constructor: takes a format string and the printf arguments.  */
@@ -46,7 +48,7 @@ autosprintf::autosprintf(const char *format, ...) {
 
 /* Copy constructor.  Necessary because the destructor is nontrivial.  */
 autosprintf::autosprintf(const autosprintf &src) {
-  str = (src.str != NULL ? strdup(src.str) : NULL);
+  str = (src.str != NULL ? _strdup(src.str) : NULL);
 }
 
 /* Destructor: frees the temporarily allocated string.  */

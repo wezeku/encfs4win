@@ -29,7 +29,6 @@
 
 using namespace std;
 using namespace rel;
-using namespace rlog;
 
 static Interface NullInterface("nullCipher", 1, 0, 0);
 static Range NullKeyRange(0);
@@ -64,11 +63,11 @@ class NullDestructor {
 
 shared_ptr<AbstractCipherKey> gNullKey(new NullKey(), NullDestructor());
 
-NullCipher::NullCipher(const Interface &iface_) { this->iface = iface_; }
+NullCipher::NullCipher(const rel::Interface &iface_) { this->iface = iface_; }
 
 NullCipher::~NullCipher() {}
 
-Interface NullCipher::interface() const { return iface; }
+Interface NullCipher::_interface() const { return iface; }
 
 CipherKey NullCipher::newKey(const char *, int, int &, long,
                              const unsigned char *, int) {

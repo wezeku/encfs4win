@@ -37,6 +37,7 @@
 
 using namespace std;
 using namespace rel;
+using std::shared_ptr;
 
 #define REF_MODULE(TYPE) \
   if (!TYPE::Enabled()) cerr << "referenceModule: should never happen\n";
@@ -94,7 +95,7 @@ bool Cipher::Register(const char *name, const char *description,
 }
 
 bool Cipher::Register(const char *name, const char *description,
-                      const Interface &iface, const Range &keyLength,
+                      const rel::Interface &iface, const Range &keyLength,
                       const Range &blockSize, CipherConstructor fn,
                       bool hidden) {
   if (!gCipherMap) gCipherMap = new CipherMap_t;
@@ -126,7 +127,7 @@ shared_ptr<Cipher> Cipher::New(const string &name, int keyLen) {
   return result;
 }
 
-shared_ptr<Cipher> Cipher::New(const Interface &iface, int keyLen) {
+shared_ptr<Cipher> Cipher::New(const rel::Interface &iface, int keyLen) {
   shared_ptr<Cipher> result;
   if (gCipherMap) {
     CipherMap_t::const_iterator it;

@@ -21,7 +21,7 @@
 #include "MemoryPool.h"
 
 #include <openssl/ossl_typ.h>
-#include <pthread.h>
+#include "pthread.h"
 #include <cstring>
 
 #ifdef HAVE_VALGRIND_MEMCHECK_H
@@ -58,8 +58,13 @@ static void freeBlock(BlockList *el) {
   delete el;
 }
 
-static pthread_mutex_t gMPoolMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t gMPoolMutex;
 static BlockList *gMemPool = NULL;
+
+void init_mpool_mutex()
+{
+	pthread_mutex_init(&gMPoolMutex, 0);
+}
 
 MemBlock MemoryPool::allocate(int size) {
   pthread_mutex_lock(&gMPoolMutex);

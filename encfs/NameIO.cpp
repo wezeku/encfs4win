@@ -20,8 +20,7 @@
 
 #include "NameIO.h"
 
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <cstring>
 // for static build.  Need to reference the modules which are registered at
 // run-time, to ensure that the linker doesn't optimize them away.
@@ -37,7 +36,6 @@
 
 using namespace std;
 using namespace rel;
-using namespace rlog;
 
 #define REF_MODULE(TYPE) \
   if (!TYPE::Enabled()) cerr << "referenceModule: should never happen\n";
@@ -81,7 +79,7 @@ list<NameIO::Algorithm> NameIO::GetAlgorithmList(bool includeHidden) {
 }
 
 bool NameIO::Register(const char *name, const char *description,
-                      const Interface &iface, Constructor constructor,
+                      const rel::Interface &iface, Constructor constructor,
                       bool hidden) {
   if (!gNameIOMap) gNameIOMap = new NameIOMap_t;
 
@@ -109,7 +107,7 @@ shared_ptr<NameIO> NameIO::New(const string &name,
   return result;
 }
 
-shared_ptr<NameIO> NameIO::New(const Interface &iface,
+shared_ptr<NameIO> NameIO::New(const rel::Interface &iface,
                                const shared_ptr<Cipher> &cipher,
                                const CipherKey &key) {
   shared_ptr<NameIO> result;
@@ -165,7 +163,7 @@ std::string NameIO::recodePath(const char *path,
 
       // figure out buffer sizes
       int approxLen = (this->*_length)(len);
-      if (approxLen <= 0) throw ERROR("Filename too small to decode");
+      if (approxLen <= 0) throw("Filename too small to decode");
 
       BUFFER_INIT(codeBuf, 32, (unsigned int)approxLen + 1)
 

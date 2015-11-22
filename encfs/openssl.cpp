@@ -21,8 +21,8 @@
 #include "openssl.h"
 
 #include <openssl/crypto.h>
-#include <pthread.h>
-#include <rlog/rlog.h>
+#include "pthread.h"
+#include "rlog/rlog.h"
 #include <stdlib.h>
 
 #define NO_DES
@@ -32,7 +32,7 @@
 #include <openssl/engine.h>
 #endif
 
-unsigned long pthreads_thread_id() { return (unsigned long)pthread_self(); }
+unsigned long pthreads_thread_id() { return GetCurrentThreadId(); }
 
 static pthread_mutex_t *crypto_locks = NULL;
 void pthreads_locking_callback(int mode, int n, const char *caller_file,

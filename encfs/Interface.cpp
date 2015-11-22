@@ -20,18 +20,12 @@
 
 #include "Interface.h"
 
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 
 #include "ConfigVar.h"
 
-namespace rlog {
-class RLogChannel;
-}  // namespace rlog
-
 using namespace rel;
-using namespace rlog;
 
-static RLogChannel *Info = DEF_CHANNEL("info/iface", Log_Info);
 
 Interface::Interface(const char *name_, int Current, int Revision, int Age)
     : _name(name_), _current(Current), _revision(Revision), _age(Age) {}

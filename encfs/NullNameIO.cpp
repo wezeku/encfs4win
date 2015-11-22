@@ -43,7 +43,7 @@ NullNameIO::NullNameIO() {}
 
 NullNameIO::~NullNameIO() {}
 
-Interface NullNameIO::interface() const { return NNIOIface; }
+Interface NullNameIO::_Interface() const { return NNIOIface; }
 
 Interface NullNameIO::CurrentInterface() { return NNIOIface; }
 

@@ -16,17 +16,14 @@
  *
  */
 
-#include <getopt.h>
-#include <pthread.h>
-#include <rlog/RLogChannel.h>
-#include <rlog/StdioNode.h>
-#include <rlog/SyslogNode.h>
-#include <rlog/rlog.h>
+#include "getopt.h"
+#include "pthread.h"
+#include "rlog/rlog.h"
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <sys/time.h>
+#include "sys/time.h"
 #include <time.h>
-#include <unistd.h>
+#include "unistd.h"
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
@@ -50,8 +47,8 @@ class DirNode;
 
 // Fuse version >= 26 requires another argument to fuse_unmount, which we
 // don't have.  So use the backward compatible call instead..
-extern "C" void fuse_unmount_compat22(const char *mountpoint);
-#define fuse_unmount fuse_unmount_compat22
+//extern "C" void fuse_unmount_compat22(const char *mountpoint);
+//#define fuse_unmount fuse_unmount_compat22
 
 /* Arbitrary identifiers for long options that do
  * not have a short version */
@@ -60,7 +57,6 @@ extern "C" void fuse_unmount_compat22(const char *mountpoint);
 #define LONG_OPT_REQUIRE_MAC 515
 
 using namespace std;
-using namespace rlog;
 using namespace rel;
 using gnu::autosprintf;
 
@@ -336,15 +332,11 @@ static bool processArgs(int argc, char *argv[],
         out->opts->passwordProgram.assign(optarg);
         break;
       case 'P':
-        if (geteuid() != 0)
-          rWarning(_("option '--public' ignored for non-root user"));
-        else {
           out->opts->ownerCreate = true;
           // add 'allow_other' option
           // add 'default_permissions' option (default)
           PUSHARG("-o");
           PUSHARG("allow_other");
-        }
         break;
       case 'V':
         // xgroup(usage)
@@ -375,7 +367,7 @@ static bool processArgs(int argc, char *argv[],
     // both rootDir and mountPoint are assumed to be slash terminated in the
     // rest of the code.
     out->opts->rootDir = slashTerminate(argv[optind++]);
-    out->opts->mountPoint = slashTerminate(argv[optind++]);
+    out->opts->mountPoint = argv[optind++];
   } else {
     // no mount point specified
     rWarning(_("Missing one or more arguments, aborting."));
@@ -432,7 +424,7 @@ static bool processArgs(int argc, char *argv[],
 
   // the raw directory may not be a subdirectory of the mount point.
   {
-    string testMountPoint = out->opts->mountPoint;
+    string testMountPoint = slashTerminate(out->opts->mountPoint);
     string testRootDir = out->opts->rootDir.substr(0, testMountPoint.length());
 
     if (testMountPoint == testRootDir) {
@@ -465,6 +457,8 @@ static bool processArgs(int argc, char *argv[],
     rWarning(_("Unable to locate root directory, aborting."));
     return false;
   }
+
+  if(out->opts->mountPoint.length() > 2)
   if (!isDirectory(out->opts->mountPoint.c_str()) &&
       !userAllowMkdir(out->opts->annotate ? 2 : 0, out->opts->mountPoint.c_str(),
                       0700)) {
@@ -526,9 +520,12 @@ void encfs_destroy(void *_ctx) {
   }
 }
 
+
+void init_mpool_mutex();
+
 int main(int argc, char *argv[]) {
-  // initialize the logging library
-  RLogInit(argc, argv);
+    SetConsoleCP(65001); // set utf-8
+    init_mpool_mutex();
 
 #if defined(ENABLE_NLS) && defined(LOCALEDIR)
   setlocale(LC_ALL, "");
@@ -536,13 +533,6 @@ int main(int argc, char *argv[]) {
   textdomain(PACKAGE);
 #endif
 
-  // log to stderr by default..
-  std::unique_ptr<StdioNode> slog(new StdioNode(STDERR_FILENO));
-  std::unique_ptr<SyslogNode> logNode;
-
-  // show error and warning output
-  slog->subscribeTo(GetGlobalChannel("error"));
-  slog->subscribeTo(GetGlobalChannel("warning"));
 
   // anything that comes from the user should be considered tainted until
   // we've processed it and only allowed through what we support.
@@ -557,8 +547,6 @@ int main(int argc, char *argv[]) {
 
   if (encfsArgs->isVerbose) {
     // subscribe to more logging channels..
-    slog->subscribeTo(GetGlobalChannel("info"));
-    slog->subscribeTo(GetGlobalChannel("debug"));
   }
 
   rDebug("Root directory: %s", encfsArgs->opts->rootDir.c_str());
@@ -611,6 +599,10 @@ int main(int argc, char *argv[]) {
   encfs_oper.utimens = encfs_utimens;
 // encfs_oper.bmap = encfs_bmap;
 
+#ifdef WIN32
+    win_encfs_oper_init(encfs_oper);
+#endif
+
   openssl_init(encfsArgs->isThreaded);
 
   // context is not a smart pointer because it will live for the life of
@@ -642,20 +634,13 @@ int main(int argc, char *argv[]) {
 
     // reset umask now, since we don't want it to interfere with the
     // pass-thru calls..
-    umask(0);
+    _umask(0);
 
     if (encfsArgs->isDaemon) {
-      // switch to logging just warning and error messages via syslog
-      logNode.reset(new SyslogNode("encfs"));
-      logNode->subscribeTo(GetGlobalChannel("warning"));
-      logNode->subscribeTo(GetGlobalChannel("error"));
-
-      // disable stderr reporting..
-      slog.reset();
 
       // keep around a pointer just in case we end up needing it to
       // report a fatal condition later (fuse_main exits unexpectedly)...
-      oldStderr = dup(STDERR_FILENO);
+      oldStderr = _dup(STDERR_FILENO);
     }
 
     try {
@@ -683,7 +668,7 @@ int main(int argc, char *argv[]) {
           (endTime - startTime <= 1)) {
         // the users will not have seen any message from fuse, so say a
         // few words in libfuse's memory..
-        FILE *out = fdopen(oldStderr, "a");
+        FILE *out = _fdopen(oldStderr, "a");
         // xgroup(usage)
         fputs(_("fuse failed.  Common problems:\n"
                 " - fuse kernel module not installed (modprobe fuse)\n"
@@ -777,7 +762,7 @@ static bool unmountFS(EncFS_Context *ctx) {
     // xgroup(diag)
     rWarning(_("Unmounting filesystem %s due to inactivity"),
              arg->opts->mountPoint.c_str());
-    fuse_unmount(arg->opts->mountPoint.c_str());
+    fuse_unmount(arg->opts->mountPoint.c_str(), NULL);
     return true;
   }
 }

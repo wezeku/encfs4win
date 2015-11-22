@@ -70,7 +70,7 @@ class Cipher {
   Cipher();
   virtual ~Cipher();
 
-  virtual rel::Interface interface() const = 0;
+  virtual rel::Interface _interface() const = 0;
 
   // create a new key based on a password
   // if iterationCount == 0, then iteration count will be determined

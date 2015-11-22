@@ -23,8 +23,7 @@
 #include <fcntl.h>
 #include <inttypes.h>
 #include <openssl/sha.h>
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <string.h>
 #include <sys/stat.h>
 #include <cerrno>
@@ -74,7 +73,7 @@ CipherFileIO::CipherFileIO(const shared_ptr<FileIO> &_base,
 
 CipherFileIO::~CipherFileIO() {}
 
-rel::Interface CipherFileIO::interface() const { return CipherFileIO_iface; }
+rel::Interface CipherFileIO::_interface() const { return CipherFileIO_iface; }
 
 int CipherFileIO::open(int flags) {
   int res = base->open(flags);

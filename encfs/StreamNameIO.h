@@ -38,7 +38,7 @@ class StreamNameIO : public NameIO {
                const CipherKey &key);
   virtual ~StreamNameIO();
 
-  virtual rel::Interface interface() const;
+  virtual rel::Interface _Interface() const;
 
   virtual int maxEncodedNameLen(int plaintextNameLen) const;
   virtual int maxDecodedNameLen(int encodedNameLen) const;

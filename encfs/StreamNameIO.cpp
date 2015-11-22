@@ -20,8 +20,7 @@
 
 #include "StreamNameIO.h"
 
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <cstring>
 
 #include "Cipher.h"
@@ -67,7 +66,7 @@ static bool StreamIO_registered = NameIO::Register(
 */
 Interface StreamNameIO::CurrentInterface() {
   // implement major version 2, 1, and 0
-  return Interface("nameio/stream", 2, 1, 2);
+  return rel::Interface("nameio/stream", 2, 1, 2);
 }
 
 StreamNameIO::StreamNameIO(const rel::Interface &iface,
@@ -77,7 +76,7 @@ StreamNameIO::StreamNameIO(const rel::Interface &iface,
 
 StreamNameIO::~StreamNameIO() {}
 
-Interface StreamNameIO::interface() const { return CurrentInterface(); }
+Interface StreamNameIO::_Interface() const { return CurrentInterface(); }
 
 int StreamNameIO::maxEncodedNameLen(int plaintextStreamLen) const {
   int encodedStreamLen = 2 + plaintextStreamLen;

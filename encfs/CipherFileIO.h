@@ -46,7 +46,7 @@ class CipherFileIO : public BlockFileIO {
   CipherFileIO(const shared_ptr<FileIO> &base, const FSConfigPtr &cfg);
   virtual ~CipherFileIO();
 
-  virtual rel::Interface interface() const;
+  virtual rel::Interface _interface() const;
 
   virtual void setFileName(const char *fileName);
   virtual const char *getFileName() const;

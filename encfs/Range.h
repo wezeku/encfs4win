@@ -21,6 +21,9 @@
 #ifndef _Range_incl_
 #define _Range_incl_
 
+#undef min
+#undef max
+
 class Range {
   int minVal;
   int maxVal;

@@ -33,7 +33,7 @@ class RawFileIO : public FileIO {
   RawFileIO(const std::string &fileName);
   virtual ~RawFileIO();
 
-  virtual rel::Interface interface() const;
+  virtual rel::Interface _interface() const;
 
   virtual void setFileName(const char *fileName);
   virtual const char *getFileName() const;

@@ -16,7 +16,7 @@
  */
 
 #include <fcntl.h>
-#include <getopt.h>
+#include "getopt.h"
 #include <limits.h>
 #include <rlog/RLogChannel.h>
 #include <rlog/StdioNode.h>
@@ -47,11 +47,29 @@
 #include "i18n.h"
 #include "intl/gettext.h"
 
+#if defined(WIN32)
+# if !defined(PATH_MAX)
+#  define PATH_MAX MAX_PATH
+# endif
+# define ngettext(a,b,n) (((n) == 1) ? (a): (b))
+static inline ssize_t readlink(const char *s, char *d, size_t n) { return -1; }
+static inline int symlink(const char *oldpath, const char *newpath) { return -1; }
+# define S_IFLNK 0
+# define S_ISLNK(mode) 0
+static inline struct tm *localtime_r(const time_t *timep, struct tm *result)
+{
+	errno_t res = localtime_s(result, timep);
+	if (res) {
+		return NULL;
+	}
+	return result;
+}
+#endif
+
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif
 
-using namespace rlog;
 using namespace std;
 using gnu::autosprintf;
 
@@ -463,7 +481,7 @@ static int copyContents(const shared_ptr<EncFS_Root> &rootInfo,
         return EXIT_FAILURE;
       }
     } else {
-      int outfd = creat(targetName, st.st_mode);
+      int outfd = _creat(targetName, st.st_mode);
 
       WriteOutput output(outfd);
       processContents(rootInfo, encfsName, output);
@@ -492,7 +510,7 @@ static int traverseDirs(const shared_ptr<EncFS_Root> &rootInfo,
         rootInfo->root->lookupNode(volumeDir.c_str(), "encfsctl");
     if (dirNode->getAttr(&st)) return EXIT_FAILURE;
 
-    mkdir(destDir.c_str(), st.st_mode);
+	unix::mkdir(destDir.c_str(), st.st_mode);
   }
 
   // show files in directory
@@ -508,7 +526,7 @@ static int traverseDirs(const shared_ptr<EncFS_Root> &rootInfo,
 
         int r = EXIT_SUCCESS;
         struct stat stBuf;
-        if (!lstat(cpath.c_str(), &stBuf)) {
+        if (!unix::lstat(cpath.c_str(), &stBuf)) {
           if (S_ISDIR(stBuf.st_mode)) {
             traverseDirs(rootInfo, (plainPath + '/').c_str(), destName + '/');
           } else if (S_ISLNK(stBuf.st_mode)) {
@@ -693,7 +711,6 @@ static int chpasswdAutomaticly(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-  RLogInit(argc, argv);
 
 #if defined(ENABLE_NLS) && defined(LOCALEDIR)
   setlocale(LC_ALL, "");
@@ -704,9 +721,6 @@ int main(int argc, char **argv) {
   SSL_load_error_strings();
   SSL_library_init();
 
-  StdioNode *slog = new StdioNode(STDERR_FILENO);
-  slog->subscribeTo(GetGlobalChannel("error"));
-  slog->subscribeTo(GetGlobalChannel("warning"));
 
   if (argc < 2) {
     usage(argv[0]);

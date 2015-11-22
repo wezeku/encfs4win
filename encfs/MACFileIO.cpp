@@ -21,8 +21,7 @@
 #include "MACFileIO.h"
 
 #include <inttypes.h>
-#include <rlog/Error.h>
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <sys/stat.h>
 #include <cstring>
 
@@ -33,15 +32,9 @@
 #include "MemoryPool.h"
 #include "i18n.h"
 
-namespace rlog {
-class RLogChannel;
-}  // namespace rlog
-
-using namespace rlog;
 using namespace rel;
 using namespace std;
 
-static RLogChannel *Info = DEF_CHANNEL("info/MACFileIO", Log_Info);
 //
 // Version 1.0 worked on blocks of size (blockSize + headerSize).
 //   That is, it took [blockSize] worth of user data and added headers.
@@ -79,7 +72,7 @@ MACFileIO::MACFileIO(const shared_ptr<FileIO> &_base, const FSConfigPtr &cfg)
 
 MACFileIO::~MACFileIO() {}
 
-rel::Interface MACFileIO::interface() const { return MACFileIO_iface; }
+rel::Interface MACFileIO::_interface() const { return MACFileIO_iface; }
 
 int MACFileIO::open(int flags) { return base->open(flags); }
 

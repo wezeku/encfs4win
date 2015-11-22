@@ -21,7 +21,7 @@
 #include "BlockFileIO.h"
 
 #include <inttypes.h>
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <cstring>
 #include <memory>
 
@@ -31,6 +31,7 @@
 #include "MemoryPool.h"
 #include "i18n.h"
 
+#undef min
 template <typename Type>
 inline Type min(Type A, Type B) {
   return (B < A) ? B : A;
@@ -149,7 +150,7 @@ ssize_t BlockFileIO::read(const IORequest &req) const {
       }
 
       ssize_t readSize = cacheReadOneBlock(blockReq);
-      if (unlikely(readSize <= partialOffset))
+      if (readSize <= partialOffset)
         break;  // didn't get enough bytes
 
       int cpySize = min((size_t)(readSize - partialOffset), size);
@@ -165,7 +166,7 @@ ssize_t BlockFileIO::read(const IORequest &req) const {
       ++blockNum;
       partialOffset = 0;
 
-      if (unlikely(readSize < _blockSize)) break;
+      if (readSize < _blockSize) break;
     }
 
     if (mb.data) MemoryPool::release(mb);

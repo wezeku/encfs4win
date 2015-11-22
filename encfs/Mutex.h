@@ -21,7 +21,7 @@
 #ifndef _Mutex_incl_
 #define _Mutex_incl_
 
-#include <pthread.h>
+#include "pthread.h"
 
 namespace rel {
 

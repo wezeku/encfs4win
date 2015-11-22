@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <utility>
 
 #include "Context.h"
@@ -26,7 +26,6 @@
 #include "Mutex.h"
 
 using namespace rel;
-using namespace rlog;
 
 EncFS_Context::EncFS_Context() {
   pthread_cond_init(&wakeupCond, 0);

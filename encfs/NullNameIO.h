@@ -34,7 +34,7 @@ class NullNameIO : public NameIO {
 
   virtual ~NullNameIO();
 
-  virtual rel::Interface interface() const;
+  virtual rel::Interface _Interface() const;
 
   virtual int maxEncodedNameLen(int plaintextNameLen) const;
   virtual int maxDecodedNameLen(int encodedNameLen) const;

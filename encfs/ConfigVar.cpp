@@ -20,10 +20,9 @@
 
 #include "ConfigVar.h"
 
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <cstring>
 
-using namespace rlog;
 
 #ifndef MIN
 inline int MIN(int a, int b) { return (a < b) ? a : b; }

@@ -45,7 +45,7 @@ class BlockNameIO : public NameIO {
               bool caseSensitiveEncoding = false);
   virtual ~BlockNameIO();
 
-  virtual rel::Interface interface() const;
+  virtual rel::Interface _Interface() const;
 
   virtual int maxEncodedNameLen(int plaintextNameLen) const;
   virtual int maxDecodedNameLen(int encodedNameLen) const;

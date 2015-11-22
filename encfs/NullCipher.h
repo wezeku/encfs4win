@@ -38,7 +38,7 @@ class NullCipher : public Cipher {
   NullCipher(const rel::Interface &iface);
   virtual ~NullCipher();
 
-  virtual rel::Interface interface() const;
+  virtual rel::Interface _interface() const;
 
   // create a new key based on a password
   virtual CipherKey newKey(const char *password, int passwdLength,

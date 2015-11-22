@@ -62,7 +62,7 @@ class NameIO {
   NameIO();
   virtual ~NameIO();
 
-  virtual rel::Interface interface() const = 0;
+  virtual rel::Interface _Interface() const = 0;
 
   void setChainedNameIV(bool enable);
   bool getChainedNameIV() const;

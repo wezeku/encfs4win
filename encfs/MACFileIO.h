@@ -46,7 +46,7 @@ class MACFileIO : public BlockFileIO {
   MACFileIO();
   virtual ~MACFileIO();
 
-  virtual rel::Interface interface() const;
+  virtual rel::Interface _interface() const;
 
   virtual void setFileName(const char *fileName);
   virtual const char *getFileName() const;

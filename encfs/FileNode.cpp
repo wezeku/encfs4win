@@ -23,12 +23,12 @@
 #include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
+#include "unistd.h"
 #ifdef linux
 #include <sys/fsuid.h>
 #endif
 
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <cstring>
 
 #include "CipherFileIO.h"
@@ -39,13 +39,9 @@
 #include "Mutex.h"
 #include "RawFileIO.h"
 
-namespace rlog {
-class RLogChannel;
-}  // namespace rlog
 
 using namespace std;
 using namespace rel;
-using namespace rlog;
 
 /*
    TODO: locking at the FileNode level is inefficient, since this precludes
@@ -56,7 +52,6 @@ using namespace rlog;
    sent to the IO subsystem!
 */
 
-static RLogChannel *Info = DEF_CHANNEL("info/FileNode", Log_Info);
 
 FileNode::FileNode(DirNode *parent_, const FSConfigPtr &cfg,
                    const char *plaintextName_, const char *cipherName_) {
@@ -140,6 +135,7 @@ int FileNode::mknod(mode_t mode, dev_t rdev, uid_t uid, gid_t gid) {
   Lock _lock(mutex);
 
   int res;
+#if 0
   int olduid = -1;
   int oldgid = -1;
   if (uid != 0) {
@@ -156,22 +152,33 @@ int FileNode::mknod(mode_t mode, dev_t rdev, uid_t uid, gid_t gid) {
       return -EPERM;
     }
   }
+#endif
 
   /*
    * cf. xmp_mknod() in fusexmp.c
    * The regular file stuff could be stripped off if there
    * were a create method (advised to have)
    */
-  if (S_ISREG(mode)) {
-    res = ::open(_cname.c_str(), O_CREAT | O_EXCL | O_WRONLY, mode);
+    if (S_ISREG( mode ) || !(mode & _S_IFMT)) {
+    res = unix::open(_cname.c_str(), O_CREAT | O_EXCL | O_WRONLY, mode);
     if (res >= 0) res = ::close(res);
+#if 0
   } else if (S_ISFIFO(mode))
     res = ::mkfifo(_cname.c_str(), mode);
   else
     res = ::mknod(_cname.c_str(), mode, rdev);
+#else
+}
+  else {
+	  errno = ENOSYS;
+	  res = -1;
+  }
+#endif
 
+#if 0
   if (olduid >= 0) setfsuid(olduid);
   if (oldgid >= 0) setfsgid(oldgid);
+#endif
 
   if (res == -1) {
     int eno = errno;
@@ -242,14 +249,14 @@ int FileNode::sync(bool datasync) {
     int res = -EIO;
 #ifdef linux
     if (datasync)
-      res = fdatasync(fh);
+      res = unix::fdatasync(fh);
     else
-      res = fsync(fh);
+      res = unix::fsync(fh);
 #else
-    (void)datasync;
+    //(void)datasync;
     // no fdatasync support
     // TODO: use autoconfig to check for it..
-    res = fsync(fh);
+    res = unix::fsync(fh);
 #endif
 
     if (res == -1) res = -errno;

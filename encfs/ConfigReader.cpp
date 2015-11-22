@@ -21,16 +21,16 @@
 #include "ConfigReader.h"
 
 #include <fcntl.h>
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <sys/stat.h>
-#include <unistd.h>
+#include "unistd.h"
 #include <cstring>
 #include <utility>
+#include "pthread.h"
 
 #include "ConfigVar.h"
 
 using namespace std;
-using namespace rlog;
 
 ConfigReader::ConfigReader() {}
 
@@ -41,16 +41,16 @@ ConfigReader::~ConfigReader() {}
 bool ConfigReader::load(const char *fileName) {
   struct stat stbuf;
   memset(&stbuf, 0, sizeof(struct stat));
-  if (lstat(fileName, &stbuf) != 0) return false;
+  if (unix::lstat(fileName, &stbuf) != 0) return false;
 
   int size = stbuf.st_size;
 
-  int fd = open(fileName, O_RDONLY);
+  int fd = unix::open(fileName, O_RDONLY);
   if (fd < 0) return false;
 
   char *buf = new char[size];
 
-  int res = ::read(fd, buf, size);
+  int res = ::_read(fd, buf, size);
   close(fd);
 
   if (res != size) {
@@ -92,7 +92,7 @@ bool ConfigReader::save(const char *fileName) const {
   // write everything to a ConfigVar, then output to disk
   ConfigVar out = toVar();
 
-  int fd = ::open(fileName, O_RDWR | O_CREAT, 0640);
+  int fd = unix::open(fileName, O_RDWR | O_CREAT, 0640);
   if (fd >= 0) {
     int retVal = ::write(fd, out.buffer(), out.size());
     close(fd);
