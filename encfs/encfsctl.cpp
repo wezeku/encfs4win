@@ -18,15 +18,13 @@
 #include <fcntl.h>
 #include "getopt.h"
 #include <limits.h>
-#include <rlog/RLogChannel.h>
-#include <rlog/StdioNode.h>
-#include <rlog/rlog.h>
+#include "rlog/rlog.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <unistd.h>
+#include "unistd.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -710,7 +708,11 @@ static int chpasswdAutomaticly(int argc, char **argv) {
   return do_chpasswd(true, false, argc, argv);
 }
 
+void init_mpool_mutex();
+
 int main(int argc, char **argv) {
+
+  init_mpool_mutex();
 
 #if defined(ENABLE_NLS) && defined(LOCALEDIR)
   setlocale(LC_ALL, "");
