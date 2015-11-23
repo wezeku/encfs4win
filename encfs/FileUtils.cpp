@@ -367,13 +367,9 @@ ConfigType readConfig(const string &rootDir,
     if (nm->environmentOverride != NULL) {
       char *envFile = getenv(nm->environmentOverride);
       if (envFile != NULL) {
-        if (!fileExists(envFile)) {
-          rError(
-              "fatal: config file specified by environment does not exist: %s",
-              envFile);
-          exit(1);
+        if (fileExists(envFile)) {
+			return readConfig_load(nm, envFile, config);
         }
-        return readConfig_load(nm, envFile, config);
       }
     }
     // the standard place to look is in the root directory
