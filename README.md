@@ -28,3 +28,7 @@ as changes come in upstream.
 
 EncFS4win has been tested with the latest release of Dokan (v0.7.4), but has not yet been tested 
 with the release candidates (v0.8.x).  
+
+## Credits
+
+Special thanks to [vgough/encfs](https://github.com/vgough/encfs) and [freddy77/encfs4win](https://github.com/freddy77/encfs4win) for establishing the groundwork that made this project possible! 
