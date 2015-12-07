@@ -383,10 +383,10 @@ my_open(const char *fn_utf8, int flags)
 {
 	rDebug("NOTIFY -- my_open");
 	std::wstring fn = utf8_to_wfn(fn_utf8);
-	HANDLE f = CreateFileW(fn.c_str(), flags == O_RDONLY ? GENERIC_WRITE : GENERIC_WRITE|GENERIC_READ, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+	HANDLE f = CreateFileW(fn.c_str(), flags == O_RDONLY ? GENERIC_READ : GENERIC_WRITE|GENERIC_READ, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 	if (f == INVALID_HANDLE_VALUE) {
 		int save_errno = win32_error_to_errno(GetLastError());
-		f = CreateFileW(fn.c_str(), flags == O_RDONLY ? GENERIC_WRITE : GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+		f = CreateFileW(fn.c_str(), flags == O_RDONLY ? GENERIC_READ : GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 		if (f == INVALID_HANDLE_VALUE) {
 			errno = save_errno;
 			return -1;
