@@ -510,6 +510,28 @@ int encfs_utimens(const char *path, const struct timespec ts[2]) {
   return withCipherPath("utimens", path, bind(_do_utimens, _1, _2, ts));
 }
 
+bool isFileReadOnly(const char *path) {
+	EncFS_Context *ctx = context();
+	int res = -EIO;
+	shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+	if (!FSRoot) return res;
+
+	shared_ptr<FileNode> node = FSRoot->lookupNode(path, "open");
+	if (node) {
+		struct stat stbuf;
+		int res = node->getAttr(&stbuf);
+		rAssert(res == 0);
+		rDebug("Mode: %lo (octal)\n", (unsigned long)stbuf.st_mode);
+
+		// No write permissions? 
+		if (S_ISREG(stbuf.st_mode) && !(_S_IWRITE & stbuf.st_mode)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 int encfs_open(const char *path, struct fuse_file_info *file) {
   EncFS_Context *ctx = context();
 
@@ -521,6 +543,13 @@ int encfs_open(const char *path, struct fuse_file_info *file) {
   if (!FSRoot) return res;
 
   try {
+
+	// Work-around for Dokan read-only file detection problem 
+	if (isFileReadOnly(path)) {
+		rDebug("NOTIFY: FIX Read only file switched to read only mode!");
+		file->flags = O_RDONLY;
+	}
+
     shared_ptr<FileNode> fnode =
         FSRoot->openNode(path, "open", file->flags, &res);
 
@@ -592,7 +621,7 @@ int _do_fsync(FileNode *fnode, int dataSync) {
 }
 
 int encfs_fsync(const char *path, int dataSync, struct fuse_file_info *file) {
-  if (isReadOnly(NULL)) return -EROFS;
+  if (isReadOnly(NULL) || isFileReadOnly(path)) return -EROFS;
   return withFileNode("fsync", path, file, bind(_do_fsync, _1, dataSync));
 }
 
@@ -605,7 +634,7 @@ int _do_write(FileNode *fnode, unsigned char *ptr, size_t size, off_t offset) {
 
 int encfs_write(const char *path, const char *buf, size_t size, long long offset,
                 struct fuse_file_info *file) {
-  if (isReadOnly(NULL)) return -EROFS;
+  if (isReadOnly(NULL) || isFileReadOnly(path)) return -EROFS;
   return withFileNode("write", path, file,
                       bind(_do_write, _1, (unsigned char *)buf, size, offset));
 }
