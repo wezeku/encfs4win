@@ -60,8 +60,8 @@ namespace rlog
 #define _ERROR_IMPL( COMPONENT, MSG ) \
     rlog::Error( STR(COMPONENT), __FILE__, __FUNCTION__, __LINE__, MSG )
 
-#undef ERROR
-#define ERROR( MSG ) _ERROR_IMPL( RLOG_COMPONENT, MSG )
+//#undef ERROR
+//#define ERROR( MSG ) _ERROR_IMPL( RLOG_COMPONENT, MSG )
 #define RLOG_ERROR( MSG ) _ERROR_IMPL( RLOG_COMPONENT, MSG )
 
 #if C99_VARIADAC_MACROS

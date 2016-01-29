@@ -261,7 +261,7 @@ bool fileExists(const char *fileName) {
 bool isDirectory(const char *fileName) {
   struct stat buf;
   if (!unix::lstat(fileName, &buf)) {
-    return S_ISDIR(buf.st_mode);
+    return (S_ISDIR(buf.st_mode)) != 0;
   } else {
     return false;
   }

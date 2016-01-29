@@ -111,9 +111,9 @@ StdioNode::StdioNode(int _fdOut, int flags)
 #else
     colorize = false;
 #endif
-    outputThreadId = (flags & OutputThreadId);
-    outputContext   = (flags & OutputContext);
-    outputChannel   = (flags & OutputChannel);
+    outputThreadId = ((flags & OutputThreadId) != 0);
+    outputContext   = ((flags & OutputContext) !=0);
+    outputChannel   = ((flags & OutputChannel) != 0);
 }
 
 StdioNode::StdioNode(int _fdOut, bool colorizeIfTTY)

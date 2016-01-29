@@ -517,7 +517,7 @@ bool isFileReadOnly(const char *path) {
 	EncFS_Context *ctx = context();
 	int res = -EIO;
 	shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
-	if (!FSRoot) return res;
+	if (!FSRoot) return true;
 
 	shared_ptr<FileNode> node = FSRoot->lookupNode(path, "open");
 	if (node) {

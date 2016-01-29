@@ -22,6 +22,7 @@
 
 #include <inttypes.h>
 #include "rlog/rlog.h"
+#include "rlog/Error.h"
 #include <sys/stat.h>
 #include <cstring>
 
@@ -191,7 +192,7 @@ ssize_t MACFileIO::readOneBlock(const IORequest &req) const {
         rWarning(_("MAC comparison failure in block %li"), blockNum);
         if (!warnOnly) {
           MemoryPool::release(mb);
-          throw ERROR(_("MAC comparison failure, refusing to read"));
+          throw RLOG_ERROR(_("MAC comparison failure, refusing to read"));
         }
       }
     }

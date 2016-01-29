@@ -21,6 +21,7 @@
 #include "StreamNameIO.h"
 
 #include "rlog/rlog.h"
+#include <rlog/Error.h>
 #include <cstring>
 
 #include "Cipher.h"
@@ -31,6 +32,7 @@
 
 using namespace rel;
 using namespace std;
+using namespace rlog;
 
 static shared_ptr<NameIO> NewStreamNameIO(const Interface &iface,
                                           const shared_ptr<Cipher> &cipher,
@@ -130,7 +132,7 @@ int StreamNameIO::decodeName(const char *encodedName, int length, uint64_t *iv,
   int decLen256 = B64ToB256Bytes(length);
   int decodedStreamLen = decLen256 - 2;
 
-  if (decodedStreamLen <= 0) throw ERROR("Filename too small to decode");
+  if (decodedStreamLen <= 0) throw RLOG_ERROR("Filename too small to decode");
 
   BUFFER_INIT(tmpBuf, 32, (unsigned int)length);
 
@@ -171,7 +173,7 @@ int StreamNameIO::decodeName(const char *encodedName, int length, uint64_t *iv,
   if (mac2 != mac) {
     rDebug("checksum mismatch: expected %u, got %u", mac, mac2);
     rDebug("on decode of %i bytes", decodedStreamLen);
-    throw ERROR("checksum mismatch in filename decode");
+	throw RLOG_ERROR("checksum mismatch in filename decode");
   }
 
   return decodedStreamLen;

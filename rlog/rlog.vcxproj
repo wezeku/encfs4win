@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
+    <ClInclude Include="Error.h" />
     <ClInclude Include="rlog-c99.h" />
     <ClInclude Include="rlog.h" />
     <ClInclude Include="RLogChannel.h" />
