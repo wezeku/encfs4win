@@ -25,6 +25,9 @@
 #include "ConfigVar.h"
 
 using namespace rel;
+using namespace rlog;
+
+static RLogChannel *Info = DEF_CHANNEL("info/Interface", Log_Info);
 
 
 Interface::Interface(const char *name_, int Current, int Revision, int Age)

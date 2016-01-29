@@ -61,8 +61,11 @@
 #define ESUCCESS 0
 
 using namespace std;
+using namespace rlog;
 using namespace std::placeholders;
 using rel::Lock;
+
+static RLogChannel *Info = DEF_CHANNEL("info/encfs", Log_Info);
 
 #define GET_FN(ctx, finfo) ctx->getNode((void *)(uintptr_t) finfo->fh)
 

@@ -230,9 +230,6 @@
     <ClInclude Include="intl\gettext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rlog\rlog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="sys\time.h">
       <Filter>Header Files</Filter>
     </ClInclude>

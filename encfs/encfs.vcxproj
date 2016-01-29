@@ -96,15 +96,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>F:\work\safecloud\boost_1_60_0;C:\OpenSSL-Win32\include;C:\Program Files\Dokan\DokanLibrary\include\fuse;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\work\encfs4win2;F:\work\safecloud\boost_1_60_0;C:\OpenSSL-Win32\include;C:\Program Files\Dokan\DokanLibrary\include\fuse;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>$(BOOST_ROOT)\includes\;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;ENCFS_EXPORTS;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;ENCFS_EXPORTS;RLOG_COMPONENT=rlog;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>F:\work\safecloud\rlog-win\win32\Release;F:\work\safecloud\boost_1_60_0\stage\lib;C:\OpenSSL-Win32\lib\VC;C:\Program Files\Dokan\DokanLibrary;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>F:\work\encfs4win2\encfs\Release;F:\work\safecloud\boost_1_60_0\stage\lib;C:\OpenSSL-Win32\lib\VC;C:\Program Files\Dokan\DokanLibrary;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libeay32MD.lib;ssleay32MD.lib;rlog.lib;dokanfuse.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -197,7 +197,6 @@
     <ClInclude Include="RawFileIO.h" />
     <ClInclude Include="readpassphrase.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="rlog\rlog.h" />
     <ClInclude Include="shared_ptr.h" />
     <ClInclude Include="SSL_Cipher.h" />
     <ClInclude Include="StreamNameIO.h" />

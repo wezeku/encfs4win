@@ -41,6 +41,9 @@
 
 using namespace std;
 using namespace rel;
+using namespace rlog;
+
+static RLogChannel *CipherInfo = DEF_CHANNEL("info/Cipher", Log_Info);
 
 const int MAX_KEYLENGTH = 32;  // in bytes (256 bit)
 const int MAX_IVLENGTH = 16;   // 128 bit (AES block size, Blowfish has 64)

@@ -44,7 +44,9 @@
 
 using namespace std;
 using namespace rel;
+using namespace rlog;
 
+static RLogChannel *Info = DEF_CHANNEL("info/DirNode", Log_Info);
 
 class DirDeleter {
  public:

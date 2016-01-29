@@ -34,6 +34,9 @@
 
 using namespace rel;
 using namespace std;
+using namespace rlog;
+
+static RLogChannel *Info = DEF_CHANNEL("info/MacFileIO", Log_Info);
 
 //
 // Version 1.0 worked on blocks of size (blockSize + headerSize).

@@ -42,6 +42,9 @@
 
 using namespace std;
 using namespace rel;
+using namespace rlog;
+
+static RLogChannel *Info = DEF_CHANNEL("info/FileNode", Log_Info);
 
 /*
    TODO: locking at the FileNode level is inefficient, since this precludes
