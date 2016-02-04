@@ -21,6 +21,13 @@
 #ifndef _encfs_incl_
 #define _encfs_incl_
 
+
+/* VS2015+ complies with C11 and defines timespec */
+#if defined(_MSC_VER) && _MSC_VER >= 1900 && !defined(_CRT_NO_TIME_T)
+#define HAVE_STRUCT_TIMESPEC 1
+#define _TIMESPEC_DEFINED
+#endif
+
 #include "fuse.h"
 #include "rlog/rlog.h"
 #include <sys/types.h>
@@ -38,32 +45,32 @@
 
 #if 0
 static __inline int setfsuid(uid_t uid) {
-  uid_t olduid = geteuid();
+	uid_t olduid = geteuid();
 
-  if (seteuid(uid) != 0) {
-    // ignore error.
-    rDebug("seteuid error: %i", errno);
-  }
+	if (seteuid(uid) != 0) {
+		// ignore error.
+		rDebug("seteuid error: %i", errno);
+	}
 
-  return olduid;
+	return olduid;
 }
 
 static __inline int setfsgid(gid_t gid) {
-  gid_t oldgid = getegid();
+	gid_t oldgid = getegid();
 
-  if (setegid(gid) != 0) {
-    // ignore error.
-    rDebug("setfsgid error: %i", errno);
-  }
+	if (setegid(gid) != 0) {
+		// ignore error.
+		rDebug("setfsgid error: %i", errno);
+	}
 
-  return oldgid;
+	return oldgid;
 }
 #endif
 #endif
 
 int encfs_getattr(const char *path, struct stat *stbuf);
 int encfs_fgetattr(const char *path, struct stat *stbuf,
-                   struct fuse_file_info *fi);
+struct fuse_file_info *fi);
 int encfs_readlink(const char *path, char *buf, size_t size);
 int encfs_getdir(const char *path, fuse_dirh_t h, fuse_dirfil_t filler);
 int encfs_mknod(const char *path, mode_t mode, dev_t rdev);
@@ -81,9 +88,9 @@ int encfs_utime(const char *path, struct utimbuf *buf);
 int encfs_open(const char *path, struct fuse_file_info *info);
 int encfs_release(const char *path, struct fuse_file_info *info);
 int encfs_read(const char *path, char *buf, size_t size, long long offset,
-               struct fuse_file_info *info);
+struct fuse_file_info *info);
 int encfs_write(const char *path, const char *buf, size_t size, long long offset,
-                struct fuse_file_info *info);
+struct fuse_file_info *info);
 int encfs_statfs(const char *, struct statvfs *fst);
 int encfs_flush(const char *, struct fuse_file_info *info);
 int encfs_fsync(const char *path, int flags, struct fuse_file_info *info);
@@ -92,14 +99,14 @@ int encfs_fsync(const char *path, int flags, struct fuse_file_info *info);
 
 #ifdef XATTR_ADD_OPT
 int encfs_setxattr(const char *path, const char *name, const char *value,
-                   size_t size, int flags, uint32_t position);
+	size_t size, int flags, uint32_t position);
 int encfs_getxattr(const char *path, const char *name, char *value, size_t size,
-                   uint32_t position);
+	uint32_t position);
 #else
 int encfs_setxattr(const char *path, const char *name, const char *value,
-                   size_t size, int flags);
+	size_t size, int flags);
 int encfs_getxattr(const char *path, const char *name, char *value,
-                   size_t size);
+	size_t size);
 #endif
 
 int encfs_listxattr(const char *path, char *list, size_t size);
