@@ -18,6 +18,8 @@
 
 #include "getopt.h"
 #include "pthread.h"
+#include "rlog/RLogChannel.h"
+#include "rlog/StdioNode.h"
 #include "rlog/rlog.h"
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -58,6 +60,7 @@ class DirNode;
 
 using namespace std;
 using namespace rel;
+using namespace rlog;
 using gnu::autosprintf;
 
 // Maximum number of arguments that we're going to pass on to fuse.  Doesn't
@@ -527,11 +530,22 @@ int main(int argc, char *argv[]) {
     SetConsoleCP(65001); // set utf-8
     init_mpool_mutex();
 
+	// initialize the logging library
+	RLogInit(argc, argv);
+
 #if defined(ENABLE_NLS) && defined(LOCALEDIR)
   setlocale(LC_ALL, "");
   bindtextdomain(PACKAGE, LOCALEDIR);
   textdomain(PACKAGE);
 #endif
+
+
+  // log to stderr by default..
+  std::unique_ptr<StdioNode> slog(new StdioNode(STDERR_FILENO));
+
+  // show error and warning output
+  slog->subscribeTo(GetGlobalChannel("error"));
+  slog->subscribeTo(GetGlobalChannel("warning"));
 
 
   // anything that comes from the user should be considered tainted until
@@ -547,6 +561,8 @@ int main(int argc, char *argv[]) {
 
   if (encfsArgs->isVerbose) {
     // subscribe to more logging channels..
+	slog->subscribeTo(GetGlobalChannel("info"));
+	slog->subscribeTo(GetGlobalChannel("debug"));
   }
 
   rDebug("Root directory: %s", encfsArgs->opts->rootDir.c_str());
