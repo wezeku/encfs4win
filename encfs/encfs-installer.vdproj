@@ -15,6 +15,12 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_06FBC2A697B04062A8E146AF21427E46"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_11A623C94372469EA92C1260FBDE129A"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -27,13 +33,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_4E51CB3A41384B7B9FAB9B6BB3DF6A0F"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_5565AF48E7C8401C87926DE3F6816066"
+        "MsmKey" = "8:_402446E39101437AAE07CC51BFF89AAA"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -51,7 +51,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_9708FA6B13164BDDAC7BEC0E7B0FA35C"
+        "MsmKey" = "8:_91328E2611FA42D7B29B74020B29A7C4"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -63,13 +63,19 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_CA617501F54E4ABD9D4DBD2902A97660"
+        "MsmKey" = "8:_C9577104200F4F858D2880A093F51AFF"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_D53327AB72CA4BAF98B1A37D6E7586DD"
+        "MsmKey" = "8:_F2E1D79CC5F442EFB38127ECEEA49818"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_FF2D63FB0E8B490D93033ABABC3CD3AF"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -184,29 +190,9 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1C3B780CEFC24B129E18819E19615010"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_06FBC2A697B04062A8E146AF21427E46"
             {
-            "SourcePath" = "8:Release\\encfsctl.exe"
-            "TargetName" = "8:encfsctl.exe"
-            "Tag" = "8:"
-            "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4E51CB3A41384B7B9FAB9B6BB3DF6A0F"
-            {
-            "SourcePath" = "8:..\\..\\EncFS\\libeay32.dll"
+            "SourcePath" = "8:..\\..\\openssl\\libeay32.dll"
             "TargetName" = "8:libeay32.dll"
             "Tag" = "8:"
             "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
@@ -224,10 +210,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5565AF48E7C8401C87926DE3F6816066"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1C3B780CEFC24B129E18819E19615010"
             {
-            "SourcePath" = "8:..\\..\\EncFS\\boost_system-vc140-mt-1_59.dll"
-            "TargetName" = "8:boost_system-vc140-mt-1_59.dll"
+            "SourcePath" = "8:Release\\encfsctl.exe"
+            "TargetName" = "8:encfsctl.exe"
             "Tag" = "8:"
             "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
             "Condition" = "8:"
@@ -284,50 +270,50 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9708FA6B13164BDDAC7BEC0E7B0FA35C"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_91328E2611FA42D7B29B74020B29A7C4"
             {
-            "SourcePath" = "8:..\\..\\EncFS\\boost_filesystem-vc140-mt-1_59.dll"
-            "TargetName" = "8:boost_filesystem-vc140-mt-1_59.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CA617501F54E4ABD9D4DBD2902A97660"
-            {
-            "SourcePath" = "8:..\\..\\EncFS\\boost_serialization-vc140-mt-1_59.dll"
-            "TargetName" = "8:boost_serialization-vc140-mt-1_59.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D53327AB72CA4BAF98B1A37D6E7586DD"
-            {
-            "SourcePath" = "8:..\\..\\EncFS\\ssleay32.dll"
+            "SourcePath" = "8:..\\..\\openssl\\ssleay32.dll"
             "TargetName" = "8:ssleay32.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C9577104200F4F858D2880A093F51AFF"
+            {
+            "SourcePath" = "8:Debug\\encfsctl.exe"
+            "TargetName" = "8:encfsctl-dbg.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F2E1D79CC5F442EFB38127ECEEA49818"
+            {
+            "SourcePath" = "8:Debug\\encfs.exe"
+            "TargetName" = "8:encfs-dbg.exe"
             "Tag" = "8:"
             "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
             "Condition" = "8:"
@@ -423,7 +409,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:encfs"
         "ProductCode" = "8:{AD091B4E-E588-497C-9C04-BD2170A76532}"
-        "PackageCode" = "8:{7527FC14-F55D-4E86-A15F-092F1E521692}"
+        "PackageCode" = "8:{120F4F19-5B2C-490B-B79D-1A7C1978DD6D}"
         "UpgradeCode" = "8:{687B6D0A-0DBE-4ABC-B814-CA5276617F05}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -953,11 +939,39 @@
             "Feature" = "8:"
             "IsolateTo" = "8:"
             }
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_402446E39101437AAE07CC51BFF89AAA"
+            {
+            "UseDynamicProperties" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
+            "SourcePath" = "8:C:\\Program Files (x86)\\Common Files\\Merge Modules\\Microsoft_VC140_DebugCRT_x86.msm"
+                "Properties"
+                {
+                }
+            "LanguageId" = "3:0"
+            "Exclude" = "11:FALSE"
+            "Folder" = "8:"
+            "Feature" = "8:"
+            "IsolateTo" = "8:"
+            }
             "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_ABBE02A8C54148FF89DB3F33CE1025D4"
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:FALSE"
             "SourcePath" = "8:C:\\Program Files (x86)\\Common Files\\Merge Modules\\Microsoft_VC120_CRT_x86.msm"
+                "Properties"
+                {
+                }
+            "LanguageId" = "3:0"
+            "Exclude" = "11:FALSE"
+            "Folder" = "8:"
+            "Feature" = "8:"
+            "IsolateTo" = "8:"
+            }
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_FF2D63FB0E8B490D93033ABABC3CD3AF"
+            {
+            "UseDynamicProperties" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
+            "SourcePath" = "8:C:\\Program Files (x86)\\Common Files\\Merge Modules\\Microsoft_VC120_DebugCRT_x86.msm"
                 "Properties"
                 {
                 }
