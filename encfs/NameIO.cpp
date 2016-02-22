@@ -20,6 +20,7 @@
 
 #include "NameIO.h"
 
+#include "rlog/Error.h"
 #include "rlog/rlog.h"
 #include <cstring>
 // for static build.  Need to reference the modules which are registered at
@@ -36,6 +37,7 @@
 
 using namespace std;
 using namespace rel;
+using namespace rlog;
 
 #define REF_MODULE(TYPE) \
   if (!TYPE::Enabled()) cerr << "referenceModule: should never happen\n";
@@ -163,7 +165,7 @@ std::string NameIO::recodePath(const char *path,
 
       // figure out buffer sizes
       int approxLen = (this->*_length)(len);
-      if (approxLen <= 0) throw("Filename too small to decode");
+      if (approxLen <= 0) throw RLOG_ERROR("Filename too small to decode");
 
       BUFFER_INIT(codeBuf, 32, (unsigned int)approxLen + 1)
 

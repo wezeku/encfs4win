@@ -18,6 +18,8 @@
 #include <fcntl.h>
 #include "getopt.h"
 #include <limits.h>
+#include "rlog/RLogChannel.h"
+#include "rlog/StdioNode.h"
 #include "rlog/rlog.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,6 +70,7 @@ static inline struct tm *localtime_r(const time_t *timep, struct tm *result)
 #define PATH_MAX 4096
 #endif
 
+using namespace rlog;
 using namespace std;
 using gnu::autosprintf;
 
@@ -711,6 +714,7 @@ static int chpasswdAutomaticly(int argc, char **argv) {
 void init_mpool_mutex();
 
 int main(int argc, char **argv) {
+	RLogInit(argc, argv);
 
   init_mpool_mutex();
 
@@ -723,6 +727,9 @@ int main(int argc, char **argv) {
   SSL_load_error_strings();
   SSL_library_init();
 
+  StdioNode *slog = new StdioNode(STDERR_FILENO);
+  slog->subscribeTo(GetGlobalChannel("error"));
+  slog->subscribeTo(GetGlobalChannel("warning"));
 
   if (argc < 2) {
     usage(argv[0]);

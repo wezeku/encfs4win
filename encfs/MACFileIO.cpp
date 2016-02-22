@@ -21,8 +21,8 @@
 #include "MACFileIO.h"
 
 #include <inttypes.h>
-#include "rlog/rlog.h"
 #include "rlog/Error.h"
+#include "rlog/rlog.h"
 #include <sys/stat.h>
 #include <cstring>
 

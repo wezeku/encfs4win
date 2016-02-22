@@ -23,8 +23,8 @@
 #include <fcntl.h>
 #include <inttypes.h>
 #include <openssl/sha.h>
-#include "rlog/rlog.h"
 #include "rlog/Error.h"
+#include "rlog/rlog.h"
 #include <string.h>
 #include <sys/stat.h>
 #include <cerrno>
