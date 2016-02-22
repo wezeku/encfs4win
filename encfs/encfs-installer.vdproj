@@ -39,13 +39,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_64863CEBAFB14DD5A1349D5D9DF94373"
+        "MsmKey" = "8:_5A0862042B0E47B598A53C91B4CB2A4E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_715895EBC263405895DD3FE9310D5FE6"
+        "MsmKey" = "8:_64863CEBAFB14DD5A1349D5D9DF94373"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -161,17 +161,17 @@
     {
         "CustomAction"
         {
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_68D22C7329314F4E802C09FCA036CC90"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_D9703054F40F4D37B41D950A870731A0"
             {
-            "Name" = "8:DokanInstall_0.7.4.exe /S"
+            "Name" = "8:DokanSetup_1.0.0RC1.exe /install"
             "Condition" = "8:DOKAN_EXE=\"\""
-            "Object" = "8:_715895EBC263405895DD3FE9310D5FE6"
+            "Object" = "8:_5A0862042B0E47B598A53C91B4CB2A4E"
             "FileType" = "3:2"
             "InstallAction" = "3:1"
-            "Arguments" = "8:/S"
+            "Arguments" = "8:/install"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_14E464FE_5800_464A_A691_F785E7A23EB6"
+            "Identifier" = "8:_6E7B4F80_55A8_4BD9_AA42_BC4972A181CC"
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
@@ -230,10 +230,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_64863CEBAFB14DD5A1349D5D9DF94373"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5A0862042B0E47B598A53C91B4CB2A4E"
             {
-            "SourcePath" = "8:Release\\encfs.exe"
-            "TargetName" = "8:encfs.exe"
+            "SourcePath" = "8:..\\..\\EncFS\\DokanSetup_1.0.0RC1.exe"
+            "TargetName" = "8:DokanSetup_1.0.0RC1.exe"
             "Tag" = "8:"
             "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
             "Condition" = "8:"
@@ -250,10 +250,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_715895EBC263405895DD3FE9310D5FE6"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_64863CEBAFB14DD5A1349D5D9DF94373"
             {
-            "SourcePath" = "8:..\\..\\EncFS\\DokanInstall_0.7.4.exe"
-            "TargetName" = "8:DokanInstall_0.7.4.exe"
+            "SourcePath" = "8:Release\\encfs.exe"
+            "TargetName" = "8:encfs.exe"
             "Tag" = "8:"
             "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
             "Condition" = "8:"

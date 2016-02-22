@@ -120,7 +120,7 @@ static int truncate_handle(HANDLE fd, __int64 length)
 	LONG high = length >> 32;
 	if (!SetFilePointer(fd, (LONG) length, &high, FILE_BEGIN)
 	    || !SetEndOfFile(fd) ) {
-		int save_errno = win32_error_to_errno(GetLastError());
+		int save_errno = ERRNO_FROM_WIN32(GetLastError());
 		errno = save_errno;
 		return -1;
 	}
@@ -144,7 +144,7 @@ int unix::truncate(const char *path, __int64 length)
 		fd = CreateFileW(fn.c_str(), GENERIC_WRITE|GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
 
 	if (fd == INVALID_HANDLE_VALUE) {
-		errno = win32_error_to_errno(GetLastError());
+		errno = ERRNO_FROM_WIN32(GetLastError());
 		return -1;
 	}
 
@@ -329,7 +329,7 @@ unix::utimes(const char *filename, const struct timeval times[2])
 	if (h == INVALID_HANDLE_VALUE)
 		h = CreateFileW(fn.c_str(), FILE_WRITE_ATTRIBUTES, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if (h == INVALID_HANDLE_VALUE) {
-		errno = win32_error_to_errno(GetLastError());
+		errno = ERRNO_FROM_WIN32(GetLastError());
 		return -1;
 	}
 	FILETIME fta = timevalToFiletime(times[0]);
@@ -338,7 +338,7 @@ unix::utimes(const char *filename, const struct timeval times[2])
 	DWORD win_err = GetLastError();
 	CloseHandle(h);
 	if (!res) {
-		errno = win32_error_to_errno(win_err);
+		errno = ERRNO_FROM_WIN32(win_err);
 		return -1;
 	}
 	return 0;
@@ -359,7 +359,7 @@ unix::statvfs(const char *path, struct statvfs *fs)
 
 	ULARGE_INTEGER avail, free_bytes, bytes;
 	if (!GetDiskFreeSpaceExA(path, &avail, &bytes, &free_bytes)) {
-		errno = win32_error_to_errno(GetLastError());
+		errno = ERRNO_FROM_WIN32(GetLastError());
 		return -1;
 	}
 
@@ -385,7 +385,7 @@ my_open(const char *fn_utf8, int flags)
 	std::wstring fn = utf8_to_wfn(fn_utf8);
 	HANDLE f = CreateFileW(fn.c_str(), flags == O_RDONLY ? GENERIC_READ : GENERIC_WRITE|GENERIC_READ, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 	if (f == INVALID_HANDLE_VALUE) {
-		int save_errno = win32_error_to_errno(GetLastError());
+		int save_errno = ERRNO_FROM_WIN32(GetLastError());
 		f = CreateFileW(fn.c_str(), flags == O_RDONLY ? GENERIC_READ : GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 		if (f == INVALID_HANDLE_VALUE) {
 			errno = save_errno;
@@ -438,7 +438,7 @@ unix::mkdir(const char *fn, int mode)
 	rDebug("NOTIFY -- unix::mkdir");
 	if (CreateDirectoryW(utf8_to_wfn(fn).c_str(), NULL))
 		return 0;
-	errno = win32_error_to_errno(GetLastError());
+	errno = ERRNO_FROM_WIN32(GetLastError());
 	return -1;
 }
 
@@ -448,7 +448,7 @@ unix::rename(const char *oldpath, const char *newpath)
 	rDebug("NOTIFY -- unix::rename");
 	if (MoveFileW(utf8_to_wfn(oldpath).c_str(), utf8_to_wfn(newpath).c_str()))
 		return 0;
-	errno = win32_error_to_errno(GetLastError());
+	errno = ERRNO_FROM_WIN32(GetLastError());
 	return -1;
 }
 
@@ -458,7 +458,7 @@ unix::unlink(const char *path)
 	rDebug("NOTIFY -- unix::unlink");
 	if (DeleteFileW(utf8_to_wfn(path).c_str()))
 		return 0;
-	errno = win32_error_to_errno(GetLastError());
+	errno = ERRNO_FROM_WIN32(GetLastError());
 	return -1;
 }
 
@@ -468,12 +468,12 @@ unix::rmdir(const char *path)
 	rDebug("NOTIFY -- unix::rmdir");
 	if (RemoveDirectoryW(utf8_to_wfn(path).c_str()))
 		return 0;
-	errno = win32_error_to_errno(GetLastError());
+	errno = ERRNO_FROM_WIN32(GetLastError());
 	return -1;
 }
 
 int
-unix::stat(const char *path, struct _stati64 *buffer)
+unix::stat(const char *path, stat_st *buffer)
 {
 	rDebug("NOTIFY -- unix::stat");
 	std::wstring fn = utf8_to_wfn(path).c_str();
@@ -487,7 +487,7 @@ unix::stat(const char *path, struct _stati64 *buffer)
 	WIN32_FIND_DATAW wfd;
 	HANDLE hff = FindFirstFileW(fn.c_str(), &wfd);
 	if (hff == INVALID_HANDLE_VALUE) {
-		errno = win32_error_to_errno(GetLastError());
+		errno = ERRNO_FROM_WIN32(GetLastError());
 		return -1;
 	}
 	FindClose(hff);
@@ -514,9 +514,16 @@ unix::stat(const char *path, struct _stati64 *buffer)
 	buffer->st_uid = 0;
 	buffer->st_gid = 0;
 	buffer->st_size = wfd.nFileSizeHigh * (((uint64_t)1)<<32) + wfd.nFileSizeLow;
+
+#ifdef CYGWIN_STAT_ST
+	buffer->st_atim.tv_sec = filetimeToUnixTime(&wfd.ftLastAccessTime);
+	buffer->st_mtim.tv_sec = filetimeToUnixTime(&wfd.ftLastWriteTime);
+	buffer->st_ctim.tv_sec = filetimeToUnixTime(&wfd.ftCreationTime);
+#else
 	buffer->st_atime = filetimeToUnixTime(&wfd.ftLastAccessTime);
 	buffer->st_mtime = filetimeToUnixTime(&wfd.ftLastWriteTime);
 	buffer->st_ctime = filetimeToUnixTime(&wfd.ftCreationTime);
+#endif
 
 	return 0;
 }
@@ -553,7 +560,7 @@ unix::opendir(const char *name)
 		path += L"\\*";
 	dir->hff = FindFirstFileW(path.c_str(), &dir->wfd);
 	if (dir->hff == INVALID_HANDLE_VALUE) {
-		errno = win32_error_to_errno(GetLastError());
+		errno = ERRNO_FROM_WIN32(GetLastError());
 		free(dir);
 		return NULL;
 	}
@@ -585,7 +592,7 @@ unix::readdir(unix::DIR* dir)
 	if (dir->pos == 0) {
 		++dir->pos;
 	} else if (!FindNextFileW(dir->hff, &dir->wfd)) {
-		errno = GetLastError() == ERROR_NO_MORE_FILES ? 0 : win32_error_to_errno(GetLastError());
+		errno = GetLastError() == ERROR_NO_MORE_FILES ? 0 : ERRNO_FROM_WIN32(GetLastError());
 		return NULL;
 	}
 	std::string path = wchar_to_utf8_cstr(dir->wfd.cFileName);

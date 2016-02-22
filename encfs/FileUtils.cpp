@@ -251,7 +251,7 @@ EncFS_Root::EncFS_Root() {}
 EncFS_Root::~EncFS_Root() {}
 
 bool fileExists(const char *fileName) {
-  struct stat buf;
+  stat_st buf;
   if (!unix::lstat(fileName, &buf)) {
     return true;
   } else {
@@ -261,7 +261,7 @@ bool fileExists(const char *fileName) {
 }
 
 bool isDirectory(const char *fileName) {
-  struct stat buf;
+  stat_st buf;
   if (!unix::lstat(fileName, &buf)) {
     return (S_ISDIR(buf.st_mode)) != 0;
   } else {

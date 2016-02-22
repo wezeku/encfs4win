@@ -39,8 +39,8 @@ ConfigReader::~ConfigReader() {}
 // read the entire file into a ConfigVar instance and then use that to decode
 // into mapped variables.
 bool ConfigReader::load(const char *fileName) {
-  struct stat stbuf;
-  memset(&stbuf, 0, sizeof(struct stat));
+  stat_st stbuf;
+  memset(&stbuf, 0, sizeof(stat_st));
   if (unix::lstat(fileName, &stbuf) != 0) return false;
 
   int size = stbuf.st_size;

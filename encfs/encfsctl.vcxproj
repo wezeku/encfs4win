@@ -80,12 +80,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;ENCFS_EXPORTS;RLOG_COMPONENT=rlog-ctl;_CRT_SECURE_NO_WARNINGS;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;$(BOOST_ROOT)\includes\;..\..\openssl\include;..\..\dokany-0.7.4\dokan_fuse\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(BOOST_ROOT)\includes\;..\..\openssl\include;..\..\dokany-1.0.0-RC1\dokan_fuse\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>$(BOOST_ROOT)\includes\;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\..\dokany-0.7.4\Win32\Debug\*.lib;..\..\openssl\lib\VC\libeay32MDd.lib;..\..\openssl\lib\VC\ssleay32MDd.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_filesystem-vc140-mt-gd-1_59.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_system-vc140-mt-gd-1_59.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_serialization-vc140-mt-gd-1_59.lib;..\rlog\Debug\*.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\dokany-1.0.0-RC1\Win32\Debug\dokanfuse1.lib;..\..\openssl\lib\VC\libeay32MDd.lib;..\..\openssl\lib\VC\ssleay32MDd.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_filesystem-vc140-mt-gd-1_59.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_system-vc140-mt-gd-1_59.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_serialization-vc140-mt-gd-1_59.lib;..\rlog\Debug\*.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -109,7 +109,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\;$(BOOST_ROOT)\includes\;..\..\openssl\include;..\..\dokany-0.7.4\dokan_fuse\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(BOOST_ROOT)\includes\;..\..\openssl\include;..\..\dokany-1.0.0-RC1\dokan_fuse\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>$(BOOST_ROOT)\includes\;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;ENCFS_EXPORTS;RLOG_COMPONENT=rlog-ctl;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
@@ -118,7 +118,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>..\..\dokany-0.7.4\Win32\Release\*.lib;..\..\openssl\lib\VC\libeay32MD.lib;..\..\openssl\lib\VC\ssleay32MD.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_filesystem-vc140-mt-1_59.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_system-vc140-mt-1_59.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_serialization-vc140-mt-1_59.lib;..\rlog\Release\*.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\dokany-1.0.0-RC1\Win32\Release\dokanfuse1.lib;..\..\openssl\lib\VC\libeay32MD.lib;..\..\openssl\lib\VC\ssleay32MD.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_filesystem-vc140-mt-1_59.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_system-vc140-mt-1_59.lib;$(BOOST_ROOT)\lib32-msvc-14.0\libboost_serialization-vc140-mt-1_59.lib;..\rlog\Release\*.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

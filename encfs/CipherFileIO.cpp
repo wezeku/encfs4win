@@ -140,7 +140,7 @@ bool CipherFileIO::setIV(uint64_t iv) {
  * Upper file   = file we present to the user via FUSE
  * Backing file = file that is actually on disk
  */
-int CipherFileIO::getAttr(struct stat *stbuf) const {
+int CipherFileIO::getAttr(stat_st *stbuf) const {
 
   // stat() the backing file
   int res = base->getAttr(stbuf);
@@ -278,7 +278,7 @@ bool CipherFileIO::writeHeader() {
  */
 void CipherFileIO::generateReverseHeader(unsigned char *headerBuf) {
 
-  struct stat stbuf;
+  stat_st stbuf;
   int res = getAttr(&stbuf);
   rAssert(res == 0);
   ino_t ino = stbuf.st_ino;

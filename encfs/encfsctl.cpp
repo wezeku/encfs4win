@@ -356,11 +356,17 @@ static int cmd_ls(int argc, char **argv) {
            name = dt.nextPlaintextName()) {
         shared_ptr<FileNode> fnode =
             rootInfo->root->lookupNode(name.c_str(), "encfsctl-ls");
-        struct stat stbuf;
+        stat_st stbuf;
         fnode->getAttr(&stbuf);
 
         struct tm stm;
-        localtime_r(&stbuf.st_mtime, &stm);
+
+#ifdef CYGWIN_STAT_ST
+        localtime_r(&stbuf.st_mtim.tv_sec, &stm);
+#else
+		localtime_r(&stbuf.st_mtime, &stm);
+#endif
+
         stm.tm_year += 1900;
         // TODO: when I add "%s" to the end and name.c_str(), I get a
         // seg fault from within strlen.  Why ???
@@ -434,7 +440,7 @@ static int cmd_cat(int argc, char **argv) {
   return errCode;
 }
 
-static int copyLink(const struct stat &stBuf,
+static int copyLink(const stat_st &stBuf,
                     const shared_ptr<EncFS_Root> &rootInfo, const string &cpath,
                     const string &destName) {
   std::vector<char> buf(stBuf.st_size + 1, '\0');
@@ -464,7 +470,7 @@ static int copyContents(const shared_ptr<EncFS_Root> &rootInfo,
     cerr << "unable to open " << encfsName << "\n";
     return EXIT_FAILURE;
   } else {
-    struct stat st;
+    stat_st st;
 
     if (node->getAttr(&st) != 0) return EXIT_FAILURE;
 
@@ -506,7 +512,7 @@ static int traverseDirs(const shared_ptr<EncFS_Root> &rootInfo,
   // Lookup directory node so we can create a destination directory
   // with the same permissions
   {
-    struct stat st;
+    stat_st st;
     shared_ptr<FileNode> dirNode =
         rootInfo->root->lookupNode(volumeDir.c_str(), "encfsctl");
     if (dirNode->getAttr(&st)) return EXIT_FAILURE;
@@ -526,7 +532,7 @@ static int traverseDirs(const shared_ptr<EncFS_Root> &rootInfo,
         string destName = destDir + name;
 
         int r = EXIT_SUCCESS;
-        struct stat stBuf;
+        stat_st stBuf;
         if (!unix::lstat(cpath.c_str(), &stBuf)) {
           if (S_ISDIR(stBuf.st_mode)) {
             traverseDirs(rootInfo, (plainPath + '/').c_str(), destName + '/');

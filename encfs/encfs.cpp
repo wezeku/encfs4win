@@ -163,7 +163,7 @@ static int withFileNode(const char *opName, const char *path,
     can be done here.
 */
 
-int _do_getattr(FileNode *fnode, struct stat *stbuf) {
+int _do_getattr(FileNode *fnode, stat_st *stbuf) {
   int res = fnode->getAttr(stbuf);
 #if 0
   if (res == ESUCCESS && S_ISLNK(stbuf->st_mode)) {
@@ -191,11 +191,11 @@ int _do_getattr(FileNode *fnode, struct stat *stbuf) {
   return res;
 }
 
-int encfs_getattr(const char *path, struct stat *stbuf) {
+int encfs_getattr(const char *path, stat_st *stbuf) {
   return withFileNode("getattr", path, NULL, bind(_do_getattr, _1, stbuf));
 }
 
-int encfs_fgetattr(const char *path, struct stat *stbuf,
+int encfs_fgetattr(const char *path, stat_st *stbuf,
                    struct fuse_file_info *fi) {
   return withFileNode("fgetattr", path, fi, bind(_do_getattr, _1, stbuf));
 }
@@ -267,7 +267,7 @@ int encfs_mknod(const char *path, mode_t mode, dev_t rdev) {
       rInfo("trying public filesystem workaround for %s", parent.c_str());
       shared_ptr<FileNode> dnode = FSRoot->lookupNode(parent.c_str(), "mknod");
 
-      struct stat st;
+      stat_st st;
       if (dnode->getAttr(&st) == 0)
         res = fnode->mknod(mode, rdev, uid, st.st_gid);
     }
@@ -302,7 +302,7 @@ int encfs_mkdir(const char *path, mode_t mode) {
       string parent = parentDirectory(path);
       shared_ptr<FileNode> dnode = FSRoot->lookupNode(parent.c_str(), "mkdir");
 
-      struct stat st;
+      stat_st st;
       if (dnode->getAttr(&st) == 0)
         res = FSRoot->mkdir(path, mode, uid, st.st_gid);
     }
@@ -530,7 +530,7 @@ bool isFileReadOnly(const char *path) {
 
 	shared_ptr<FileNode> node = FSRoot->lookupNode(path, "open");
 	if (node) {
-		struct stat stbuf;
+		stat_st stbuf;
 		int res = node->getAttr(&stbuf);
 		rAssert(res == 0);
 		rDebug("Mode: %lo (octal)\n", (unsigned long)stbuf.st_mode);
@@ -793,7 +793,7 @@ static int encfs_win_set_attributes(const char *fn, uint32_t attr)
    std::wstring path = utf8_to_wfn(FSRoot->cipherPath(fn));
    if (SetFileAttributesW(path.c_str(), attr))
         return 0;
-   return -win32_error_to_errno(GetLastError());
+   return -ERRNO_FROM_WIN32(GetLastError());
 }
 
 static int _do_win_set_times(FileNode *fnode, const FILETIME *create, const FILETIME *access, const FILETIME *modified)
@@ -807,7 +807,7 @@ static int _do_win_set_times(FileNode *fnode, const FILETIME *create, const FILE
     {
 	if (SetFileTime((HANDLE)_get_osfhandle(res), create, access, modified))
 	    return 0;
-	res = -win32_error_to_errno(GetLastError());
+	res = -ERRNO_FROM_WIN32(GetLastError());
     }
 
     return res;
@@ -826,14 +826,14 @@ static int encfs_win_set_times(const char *path, struct fuse_file_info *fi, cons
 
 	HANDLE f = CreateFileW(fn.c_str(), FILE_WRITE_ATTRIBUTES, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	if (f == INVALID_HANDLE_VALUE)
-	    return -win32_error_to_errno(GetLastError());
+	    return -ERRNO_FROM_WIN32(GetLastError());
 
  	if (SetFileTime(f, create, access, modified))
 	{
 	    CloseHandle(f);
 	    return 0;
 	}
-	res = -win32_error_to_errno(GetLastError());
+	res = -ERRNO_FROM_WIN32(GetLastError());
 	CloseHandle(f);
 	return res;
     }

@@ -40,7 +40,7 @@ class RawFileIO : public FileIO {
 
   virtual int open(int flags);
 
-  virtual int getAttr(struct stat *stbuf) const;
+  virtual int getAttr(stat_st *stbuf) const;
   virtual off_t getSize() const;
 
   virtual ssize_t read(const IORequest &req) const;

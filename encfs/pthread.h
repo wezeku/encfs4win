@@ -1,6 +1,7 @@
 #ifndef __PTHREAD_H
 #define __PTHREAD_H
 
+#include "fuse_win.h"
 #include <windows.h>
 #include <stdio.h>
 #include <io.h>
@@ -9,7 +10,16 @@
 #include <sys/utime.h>
 #include <string>
 
-#define stat _stati64
+
+// backwards compatability between dokan 0.7 and more modern versions 
+#define stat_st FUSE_STAT
+#if FUSE_STAT == stat64_cygwin
+#define CYGWIN_STAT_ST 1
+#define ERRNO_FROM_WIN32(x) ntstatus_error_to_errno(x)
+#else
+#define ERRNO_FROM_WIN32(x) win32_error_to_errno(x)
+#endif
+
 
 typedef HANDLE pthread_t;
 typedef CRITICAL_SECTION pthread_mutex_t;
@@ -48,8 +58,8 @@ int mkdir(const char *fn, int mode);
 int rename(const char *oldpath, const char *newpath);
 int unlink(const char *path);
 int rmdir(const char *path);
-int stat(const char *path, struct _stati64 *buffer);
-static inline int lstat(const char *path, struct _stati64 *buffer) {
+int stat(const char *path, stat_st *buffer);
+static inline int lstat(const char *path, stat_st *buffer) {
 	return unix::stat(path, buffer);
 }
 int chmod (const char*, int);
