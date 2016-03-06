@@ -473,7 +473,7 @@ unix::rmdir(const char *path)
 }
 
 int
-unix::stat(const char *path, stat_st *buffer)
+unix::stat(const char *path, struct stat_st *buffer)
 {
 	rDebug("NOTIFY -- unix::stat");
 	std::wstring fn = utf8_to_wfn(path).c_str();
@@ -515,14 +515,14 @@ unix::stat(const char *path, stat_st *buffer)
 	buffer->st_gid = 0;
 	buffer->st_size = wfd.nFileSizeHigh * (((uint64_t)1)<<32) + wfd.nFileSizeLow;
 
-#ifdef CYGWIN_STAT_ST
-	buffer->st_atim.tv_sec = filetimeToUnixTime(&wfd.ftLastAccessTime);
-	buffer->st_mtim.tv_sec = filetimeToUnixTime(&wfd.ftLastWriteTime);
-	buffer->st_ctim.tv_sec = filetimeToUnixTime(&wfd.ftCreationTime);
-#else
+#ifdef USE_LEGACY_DOKAN
 	buffer->st_atime = filetimeToUnixTime(&wfd.ftLastAccessTime);
 	buffer->st_mtime = filetimeToUnixTime(&wfd.ftLastWriteTime);
 	buffer->st_ctime = filetimeToUnixTime(&wfd.ftCreationTime);
+#else
+	buffer->st_atim.tv_sec = filetimeToUnixTime(&wfd.ftLastAccessTime);
+	buffer->st_mtim.tv_sec = filetimeToUnixTime(&wfd.ftLastWriteTime);
+	buffer->st_ctim.tv_sec = filetimeToUnixTime(&wfd.ftCreationTime);
 #endif
 
 	return 0;

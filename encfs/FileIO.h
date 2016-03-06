@@ -61,7 +61,7 @@ class FileIO {
   virtual int open(int flags) = 0;
 
   // get filesystem attributes for a file
-  virtual int getAttr(stat_st *stbuf) const = 0;
+  virtual int getAttr(struct stat_st *stbuf) const = 0;
   virtual off_t getSize() const = 0;
 
   virtual ssize_t read(const IORequest &req) const = 0;

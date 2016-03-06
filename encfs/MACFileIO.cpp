@@ -120,7 +120,7 @@ static off_t locWithoutHeader(off_t offset, int blockSize, int headerSize) {
   return offset - blockNum * headerSize;
 }
 
-int MACFileIO::getAttr(stat_st *stbuf) const {
+int MACFileIO::getAttr(struct stat_st *stbuf) const {
   int res = base->getAttr(stbuf);
 
   if (res == 0 && S_ISREG(stbuf->st_mode)) {

@@ -183,7 +183,7 @@ bool RenameOp::apply() {
       rDebug("renaming %s -> %s", last->oldCName.c_str(),
              last->newCName.c_str());
 
-      stat_st st;
+	  struct stat_st st;
       bool preserve_mtime = unix::stat(last->oldCName.c_str(), &st) == 0;
 
       // internal node rename..
@@ -200,12 +200,12 @@ bool RenameOp::apply() {
       if (preserve_mtime) {
         struct utimbuf ut;
 
-#ifdef CYGWIN_STAT_ST
-        ut.actime = st.st_atim.tv_sec;
-        ut.modtime = st.st_mtim.tv_sec;
-#else 
+#ifdef USE_LEGACY_DOKAN
 		ut.actime = st.st_atime;
 		ut.modtime = st.st_mtime;
+#else 
+		ut.actime = st.st_atim.tv_sec;
+		ut.modtime = st.st_mtim.tv_sec;
 #endif
 
         unix::utime(last->newCName.c_str(), &ut);
@@ -568,7 +568,7 @@ int DirNode::rename(const char *fromPlaintext, const char *toPlaintext) {
 
   int res = 0;
   try {
-    stat_st st;
+	struct stat_st st;
     bool preserve_mtime = unix::stat(fromCName.c_str(), &st) == 0;
 
     renameNode(fromPlaintext, toPlaintext);
@@ -583,12 +583,12 @@ int DirNode::rename(const char *fromPlaintext, const char *toPlaintext) {
     } else if (preserve_mtime) {
       struct utimbuf ut;
 
-#ifdef CYGWIN_STAT_ST
-      ut.actime = st.st_atim.tv_sec;
-      ut.modtime = st.st_mtim.tv_sec;
-#else
+#ifdef USE_LEGACY_DOKAN
 	  ut.actime = st.st_atime;
 	  ut.modtime = st.st_mtime;
+#else
+	  ut.actime = st.st_atim.tv_sec;
+	  ut.modtime = st.st_mtim.tv_sec;
 #endif
 
       unix::utime(toCName.c_str(), &ut);

@@ -163,7 +163,7 @@ static int withFileNode(const char *opName, const char *path,
     can be done here.
 */
 
-int _do_getattr(FileNode *fnode, stat_st *stbuf) {
+int _do_getattr(FileNode *fnode, struct stat_st *stbuf) {
   int res = fnode->getAttr(stbuf);
 #if 0
   if (res == ESUCCESS && S_ISLNK(stbuf->st_mode)) {
@@ -191,11 +191,11 @@ int _do_getattr(FileNode *fnode, stat_st *stbuf) {
   return res;
 }
 
-int encfs_getattr(const char *path, stat_st *stbuf) {
+int encfs_getattr(const char *path, struct stat_st *stbuf) {
   return withFileNode("getattr", path, NULL, bind(_do_getattr, _1, stbuf));
 }
 
-int encfs_fgetattr(const char *path, stat_st *stbuf,
+int encfs_fgetattr(const char *path, struct stat_st *stbuf,
                    struct fuse_file_info *fi) {
   return withFileNode("fgetattr", path, fi, bind(_do_getattr, _1, stbuf));
 }
@@ -267,7 +267,7 @@ int encfs_mknod(const char *path, mode_t mode, dev_t rdev) {
       rInfo("trying public filesystem workaround for %s", parent.c_str());
       shared_ptr<FileNode> dnode = FSRoot->lookupNode(parent.c_str(), "mknod");
 
-      stat_st st;
+	  struct stat_st st;
       if (dnode->getAttr(&st) == 0)
         res = fnode->mknod(mode, rdev, uid, st.st_gid);
     }
@@ -302,7 +302,7 @@ int encfs_mkdir(const char *path, mode_t mode) {
       string parent = parentDirectory(path);
       shared_ptr<FileNode> dnode = FSRoot->lookupNode(parent.c_str(), "mkdir");
 
-      stat_st st;
+	  struct stat_st st;
       if (dnode->getAttr(&st) == 0)
         res = FSRoot->mkdir(path, mode, uid, st.st_gid);
     }
@@ -530,7 +530,7 @@ bool isFileReadOnly(const char *path) {
 
 	shared_ptr<FileNode> node = FSRoot->lookupNode(path, "open");
 	if (node) {
-		stat_st stbuf;
+		struct stat_st stbuf;
 		int res = node->getAttr(&stbuf);
 		rAssert(res == 0);
 		rDebug("Mode: %lo (octal)\n", (unsigned long)stbuf.st_mode);

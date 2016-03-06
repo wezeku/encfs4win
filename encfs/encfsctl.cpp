@@ -356,15 +356,15 @@ static int cmd_ls(int argc, char **argv) {
            name = dt.nextPlaintextName()) {
         shared_ptr<FileNode> fnode =
             rootInfo->root->lookupNode(name.c_str(), "encfsctl-ls");
-        stat_st stbuf;
+		struct stat_st stbuf;
         fnode->getAttr(&stbuf);
 
         struct tm stm;
 
-#ifdef CYGWIN_STAT_ST
-        localtime_r(&stbuf.st_mtim.tv_sec, &stm);
-#else
+#ifdef USE_LEGACY_DOKAN
 		localtime_r(&stbuf.st_mtime, &stm);
+#else
+		localtime_r(&stbuf.st_mtim.tv_sec, &stm);
 #endif
 
         stm.tm_year += 1900;
@@ -440,7 +440,7 @@ static int cmd_cat(int argc, char **argv) {
   return errCode;
 }
 
-static int copyLink(const stat_st &stBuf,
+static int copyLink(const struct stat_st &stBuf,
                     const shared_ptr<EncFS_Root> &rootInfo, const string &cpath,
                     const string &destName) {
   std::vector<char> buf(stBuf.st_size + 1, '\0');
@@ -470,7 +470,7 @@ static int copyContents(const shared_ptr<EncFS_Root> &rootInfo,
     cerr << "unable to open " << encfsName << "\n";
     return EXIT_FAILURE;
   } else {
-    stat_st st;
+	struct stat_st st;
 
     if (node->getAttr(&st) != 0) return EXIT_FAILURE;
 
@@ -512,7 +512,7 @@ static int traverseDirs(const shared_ptr<EncFS_Root> &rootInfo,
   // Lookup directory node so we can create a destination directory
   // with the same permissions
   {
-    stat_st st;
+	struct stat_st st;
     shared_ptr<FileNode> dirNode =
         rootInfo->root->lookupNode(volumeDir.c_str(), "encfsctl");
     if (dirNode->getAttr(&st)) return EXIT_FAILURE;
@@ -532,7 +532,7 @@ static int traverseDirs(const shared_ptr<EncFS_Root> &rootInfo,
         string destName = destDir + name;
 
         int r = EXIT_SUCCESS;
-        stat_st stBuf;
+		struct stat_st stBuf;
         if (!unix::lstat(cpath.c_str(), &stBuf)) {
           if (S_ISDIR(stBuf.st_mode)) {
             traverseDirs(rootInfo, (plainPath + '/').c_str(), destName + '/');

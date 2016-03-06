@@ -16,6 +16,7 @@
  *
  */
 
+#include "encfs.h"
 #include "getopt.h"
 #include "pthread.h"
 #include "rlog/RLogChannel.h"
@@ -40,7 +41,6 @@
 #include "MemoryPool.h"
 #include "autosprintf.h"
 #include "config.h"
-#include "encfs.h"
 #include "fuse.h"
 #include "i18n.h"
 #include "openssl.h"

@@ -94,7 +94,7 @@ const char *FileNode::plaintextName() const { return _pname.c_str(); }
 string FileNode::plaintextParent() const { return parentDirectory(_pname); }
 
 static bool setIV(const shared_ptr<FileIO> &io, uint64_t iv) {
-  stat_st stbuf;
+  struct stat_st stbuf;
   if ((io->getAttr(&stbuf) < 0) || S_ISREG(stbuf.st_mode))
     return io->setIV(iv);
   else
@@ -199,7 +199,7 @@ int FileNode::open(int flags) const {
   return res;
 }
 
-int FileNode::getAttr(stat_st *stbuf) const {
+int FileNode::getAttr(struct stat_st *stbuf) const {
   Lock _lock(mutex);
 
   int res = io->getAttr(stbuf);

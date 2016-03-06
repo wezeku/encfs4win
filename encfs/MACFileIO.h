@@ -53,7 +53,7 @@ class MACFileIO : public BlockFileIO {
   virtual bool setIV(uint64_t iv);
 
   virtual int open(int flags);
-  virtual int getAttr(stat_st *stbuf) const;
+  virtual int getAttr(struct stat_st *stbuf) const;
   virtual off_t getSize() const;
 
   virtual int truncate(off_t size);

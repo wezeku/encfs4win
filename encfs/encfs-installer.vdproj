@@ -33,6 +33,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_272E42CB3BD3406896F921A75909ADE0"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_402446E39101437AAE07CC51BFF89AAA"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -58,18 +64,6 @@
         "Entry"
         {
         "MsmKey" = "8:_ABBE02A8C54148FF89DB3F33CE1025D4"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9577104200F4F858D2880A093F51AFF"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F2E1D79CC5F442EFB38127ECEEA49818"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -161,17 +155,17 @@
     {
         "CustomAction"
         {
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_D9703054F40F4D37B41D950A870731A0"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_35049CE6E11843BCB160AF67DB729192"
             {
-            "Name" = "8:DokanSetup_1.0.0RC1.exe /install"
-            "Condition" = "8:DOKAN_EXE=\"\""
-            "Object" = "8:_5A0862042B0E47B598A53C91B4CB2A4E"
+            "Name" = "8:DokanInstall_0.7.4.exe /S"
+            "Condition" = "8:DOKAN_DLL=\"\""
+            "Object" = "8:_272E42CB3BD3406896F921A75909ADE0"
             "FileType" = "3:2"
             "InstallAction" = "3:1"
-            "Arguments" = "8:/install"
+            "Arguments" = "8:/S"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_6E7B4F80_55A8_4BD9_AA42_BC4972A181CC"
+            "Identifier" = "8:_57F00869_31EA_452A_A575_5E2E991ACC61"
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
@@ -214,6 +208,26 @@
             {
             "SourcePath" = "8:Release\\encfsctl.exe"
             "TargetName" = "8:encfsctl.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_272E42CB3BD3406896F921A75909ADE0"
+            {
+            "SourcePath" = "8:..\\..\\EncFS\\DokanInstall_0.7.4.exe"
+            "TargetName" = "8:DokanInstall_0.7.4.exe"
             "Tag" = "8:"
             "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
             "Condition" = "8:"
@@ -290,46 +304,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C9577104200F4F858D2880A093F51AFF"
-            {
-            "SourcePath" = "8:Debug\\encfsctl.exe"
-            "TargetName" = "8:encfsctl-dbg.exe"
-            "Tag" = "8:"
-            "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F2E1D79CC5F442EFB38127ECEEA49818"
-            {
-            "SourcePath" = "8:Debug\\encfs.exe"
-            "TargetName" = "8:encfs-dbg.exe"
-            "Tag" = "8:"
-            "Folder" = "8:_18A0C64421D04A30BBAC2E169203B3B4"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
         }
         "FileType"
         {
@@ -383,12 +357,12 @@
         }
         "Locator"
         {
-            "{39E1837C-0DB9-45A2-89C8-438377A77565}:_2C7824D5214F497E8B50FC61C065A292"
+            "{39E1837C-0DB9-45A2-89C8-438377A77565}:_0A854CC542BE4BCA9D1D9C5AD78309D6"
             {
-            "Name" = "8:Dokan"
-            "Folder" = "8:[ProgramFilesFolder]\\Dokan\\DokanLibrary\\"
+            "Name" = "8:Dokan1.0"
+            "Folder" = "8:[SystemFolder]"
             "Depth" = "2:0"
-            "FileName" = "8:dokanctl.exe"
+            "FileName" = "8:dokan1.dll"
             "MinVesion" = "8:"
             "MaxVersion" = "8:"
             "MinSize" = "8:"
@@ -396,7 +370,22 @@
             "MinDate" = "8:"
             "MaxDate" = "8:"
             "Languages" = "8:"
-            "Property" = "8:DOKAN_EXE"
+            "Property" = "8:DOKAN1_DLL"
+            }
+            "{39E1837C-0DB9-45A2-89C8-438377A77565}:_2C7824D5214F497E8B50FC61C065A292"
+            {
+            "Name" = "8:Dokan"
+            "Folder" = "8:[SystemFolder]"
+            "Depth" = "2:0"
+            "FileName" = "8:dokan.dll"
+            "MinVesion" = "8:"
+            "MaxVersion" = "8:"
+            "MinSize" = "8:"
+            "MaxSize" = "8:"
+            "MinDate" = "8:"
+            "MaxDate" = "8:"
+            "Languages" = "8:"
+            "Property" = "8:DOKAN_DLL"
             }
         }
         "MsiBootstrapper"
@@ -409,7 +398,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:encfs"
         "ProductCode" = "8:{AD091B4E-E588-497C-9C04-BD2170A76532}"
-        "PackageCode" = "8:{120F4F19-5B2C-490B-B79D-1A7C1978DD6D}"
+        "PackageCode" = "8:{2EF0152C-5474-4316-A026-ED728269FE34}"
         "UpgradeCode" = "8:{687B6D0A-0DBE-4ABC-B814-CA5276617F05}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"

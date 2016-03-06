@@ -26,8 +26,8 @@ For more info, see:
 I will try to keep this updated with the [EncFS project](https://github.com/vgough/encfs) 
 as changes come in upstream.  
 
-EncFS4win has been tested with the latest release of Dokan (v0.7.4), but has not yet been tested 
-with the release candidates (v0.8.x).  
+EncFS4win has been tested with the original release of Dokan (v0.7.x) as well as the latest Dokan (v1.x.x).  
+If building with v0.7.x or earlier, be sure to add the preprocessor definition "USE_LEGACY_DOKAN" for legacy support. 
 
 ## Credits
 

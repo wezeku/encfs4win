@@ -129,7 +129,7 @@ int RawFileIO::open(int flags) {
   return result;
 }
 
-int RawFileIO::getAttr(stat_st *stbuf) const {
+int RawFileIO::getAttr(struct stat_st *stbuf) const {
   int res = unix::lstat(name.c_str(), stbuf);
   int eno = errno;
 
@@ -144,8 +144,8 @@ const char *RawFileIO::getFileName() const { return name.c_str(); }
 
 off_t RawFileIO::getSize() const {
   if (!knownSize) {
-    stat_st stbuf;
-    memset(&stbuf, 0, sizeof(stat_st));
+	struct stat_st stbuf;
+    memset(&stbuf, 0, sizeof(struct stat_st));
     int res = unix::lstat(name.c_str(), &stbuf);
 
     if (res == 0) {
