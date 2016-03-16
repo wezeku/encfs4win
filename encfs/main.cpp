@@ -175,6 +175,15 @@ static string slashTerminate(const string &src) {
   return result;
 }
 
+static
+char *unslashTerminate(char *src)
+{
+	size_t l = strlen(src);
+	if (l > 1 && (src[l - 1] == '\\' || src[l - 1] == '/'))
+		src[l - 1] = 0;
+	return src;
+}
+
 static bool processArgs(int argc, char *argv[],
                         const shared_ptr<EncFS_Args> &out) {
   // set defaults
@@ -369,8 +378,8 @@ static bool processArgs(int argc, char *argv[],
   if (optind + 2 <= argc) {
     // both rootDir and mountPoint are assumed to be slash terminated in the
     // rest of the code.
-    out->opts->rootDir = slashTerminate(argv[optind++]);
-    out->opts->mountPoint = argv[optind++];
+    out->opts->rootDir = slashTerminate(unslashTerminate(argv[optind++]));
+    out->opts->mountPoint = unslashTerminate(argv[optind++]);
   } else {
     // no mount point specified
     rWarning(_("Missing one or more arguments, aborting."));
