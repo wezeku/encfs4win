@@ -1,79 +1,94 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="EncFS: an Encrypted Filesystem for FUSE.">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-    <title>EncFS</title>
+    <title>Encfs4win by jetwhiz</title>
   </head>
 
   <body>
+    <header>
+      <div class="inner">
+        <h1>Encfs4win</h1>
+        <h2>Encfs4win: an Encrypted Filesystem for FUSE on Windows.</h2>
+        <a href="https://github.com/jetwhiz/encfs4win" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/vgough/encfs">View on GitHub</a>
-
-          <h1 id="project_title">EncFS</h1>
-          <h2 id="project_tagline">EncFS: an Encrypted Filesystem for FUSE.</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/vgough/encfs/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/vgough/encfs/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h1>
-<a name="encfs---an-encrypted-filesystem" class="anchor" href="#encfs---an-encrypted-filesystem"><span class="octicon octicon-link"></span></a>EncFS - an Encrypted Filesystem</h1>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a id="encfs4win---windows-port-of-encfs" class="anchor" href="#encfs4win---windows-port-of-encfs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>encfs4win - Windows port of EncFS</h1>
 
 <h2>
-<a name="about" class="anchor" href="#about"><span class="octicon octicon-link"></span></a>About</h2>
+<a id="about" class="anchor" href="#about" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>About</h2>
 
-<p>EncFS provides an encrypted filesystem in user-space.  It runs with regular user
-permissions using the <a href="http://fuse.sourceforge.net/">FUSE</a> library.
-EncFS is <a href="http://opensource.org/">Open Source software</a>.
-The EncFS library is licensed under the
-<a href="http://opensource.org/licenses/lgpl-license">LGPL</a>.</p>
+<p>EncFS4win is a revival of the original encfs4win project, but has been brought 
+up-to-date with recent changes done to the EncFS project.  The original encfs4win 
+was based on EncFS v1.7.4, which was shown to have some <a href="https://defuse.ca/audits/encfs.htm">security issues</a>. 
+<a href="https://github.com/vgough/encfs">Updates to EncFS</a> have been done recently to fix many of these issues, and the goal of 
+this project is to port these modernizations to Windows. </p>
+
+<p>EncFS provides an encrypted filesystem in user-space. It runs in userspace,
+using the <a href="https://github.com/dokan-dev/dokany">Dokan library</a> for the filesystem interface. EncFS is open source
+software, licensed under the LGPL.</p>
+
+<p>EncFS encrypts individual files, by translating all requests for the virtual
+EncFS filesystem into the equivalent encrypted operations on the raw
+filesystem.</p>
+
+<p>For more info, see:</p>
+
+<ul>
+<li>The excellent <a href="encfs/encfs.pod">encfs manpage</a>
+</li>
+<li>The technical overview in <a href="DESIGN.md">DESIGN.md</a>
+</li>
+</ul>
 
 <h2>
-<a name="github-page" class="anchor" href="#github-page"><span class="octicon octicon-link"></span></a>GitHub page</h2>
+<a id="status" class="anchor" href="#status" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Status</h2>
 
-<p>To submit changes to EncFS, or to submit a bug ticket, see the
-<a href="https://github.com/vgough/encfs">EncFS GitHub page</a>.
+<p>I will try to keep this updated with the <a href="https://github.com/vgough/encfs">EncFS project</a> 
+as changes come in upstream.  </p>
 
-<p>GitHub hosting for EncFS is in progress.  Until the transition is complete,
-see also the original, and more complete, introduction page at
-<a href="https://sites.google.com/a/arg0.net/www/encfs">the old arg0.net</a></p>
-      </section>
+<p>EncFS4win has been tested with the original release of Dokan (v0.7.x) as well as the latest Dokan (v1.x.x).<br>
+If building with v0.7.x or earlier, be sure to add the preprocessor definition "USE_LEGACY_DOKAN" for legacy support. </p>
+
+<h2>
+<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Credits</h2>
+
+<p>Special thanks to <a href="https://github.com/vgough/encfs">vgough/encfs</a> and <a href="https://github.com/freddy77/encfs4win">freddy77/encfs4win</a> for establishing the groundwork that made this project possible! </p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/jetwhiz/encfs4win/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/jetwhiz/encfs4win/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/jetwhiz/encfs4win"></a> is maintained by <a href="https://github.com/jetwhiz">jetwhiz</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
     </div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">EncFS maintained by <a href="https://github.com/vgough">vgough</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-108985-4");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
-
-
+  
   </body>
 </html>
