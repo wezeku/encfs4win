@@ -547,20 +547,21 @@ bool isFileReadOnly(const char *path) {
 int encfs_open(const char *path, struct fuse_file_info *file) {
   EncFS_Context *ctx = context();
 
+  // Work-around for Dokan read-only file detection problem 
+  if (isFileReadOnly(path) || isReadOnly(ctx)) {
+	  rDebug("NOTIFY: FIX Read only file switched to read only mode!");
+	  file->flags = O_RDONLY;
+  }
+
   if (isReadOnly(ctx) && (file->flags & O_WRONLY || file->flags & O_RDWR))
     return -EROFS;
+
 
   int res = -EIO;
   shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
   if (!FSRoot) return res;
 
   try {
-
-	// Work-around for Dokan read-only file detection problem 
-	if (isFileReadOnly(path)) {
-		rDebug("NOTIFY: FIX Read only file switched to read only mode!");
-		file->flags = O_RDONLY;
-	}
 
     shared_ptr<FileNode> fnode =
         FSRoot->openNode(path, "open", file->flags, &res);
