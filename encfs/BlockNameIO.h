@@ -38,11 +38,11 @@ class Cipher;
 */
 class BlockNameIO : public NameIO {
  public:
-  static rel::Interface CurrentInterface(bool caseSensitive = false);
+  static rel::Interface CurrentInterface(bool caseInsensitive = false);
 
   BlockNameIO(const rel::Interface &iface, const shared_ptr<Cipher> &cipher,
               const CipherKey &key, int blockSize,
-              bool caseSensitiveEncoding = false);
+              bool caseInsensitiveEncoding = false);
   virtual ~BlockNameIO();
 
   virtual rel::Interface _Interface() const;
@@ -55,16 +55,16 @@ class BlockNameIO : public NameIO {
 
  protected:
   virtual int encodeName(const char *plaintextName, int length, uint64_t *iv,
-                         char *encodedName) const;
+                         char *encodedName, int bufferLength) const;
   virtual int decodeName(const char *encodedName, int length, uint64_t *iv,
-                         char *plaintextName) const;
+                         char *plaintextName, int bufferLength) const;
 
  private:
   int _interface;
   int _bs;
   shared_ptr<Cipher> _cipher;
   CipherKey _key;
-  bool _caseSensitive;
+  bool _caseInsensitive;
 };
 
 #endif

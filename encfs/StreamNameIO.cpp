@@ -91,7 +91,7 @@ int StreamNameIO::maxDecodedNameLen(int encodedStreamLen) const {
 }
 
 int StreamNameIO::encodeName(const char *plaintextName, int length,
-                             uint64_t *iv, char *encodedName) const {
+                             uint64_t *iv, char *encodedName, int bufferLength) const {
   uint64_t tmpIV = 0;
   if (iv && _interface >= 2) tmpIV = *iv;
 
@@ -100,6 +100,7 @@ int StreamNameIO::encodeName(const char *plaintextName, int length,
 
   // add on checksum bytes
   unsigned char *encodeBegin;
+  rAssert(bufferLength >= length + 2);
   if (_interface >= 1) {
     // current versions store the checksum at the beginning
     encodedName[0] = (mac >> 8) & 0xff;
@@ -127,10 +128,11 @@ int StreamNameIO::encodeName(const char *plaintextName, int length,
 }
 
 int StreamNameIO::decodeName(const char *encodedName, int length, uint64_t *iv,
-                             char *plaintextName) const {
+                             char *plaintextName, int bufferLength) const {
   rAssert(length > 2);
   int decLen256 = B64ToB256Bytes(length);
   int decodedStreamLen = decLen256 - 2;
+  rAssert(decodedStreamLen <= bufferLength);
 
   if (decodedStreamLen <= 0) throw RLOG_ERROR("Filename too small to decode");
 
