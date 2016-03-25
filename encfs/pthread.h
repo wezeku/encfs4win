@@ -18,7 +18,9 @@
 #define ERRNO_FROM_WIN32(x) win32_error_to_errno(x)
 #else
 #define stat_st stat64_cygwin
-#define ERRNO_FROM_WIN32(x) ntstatus_error_to_errno(x)
+extern "C" int errno_to_win32_error(int err);
+extern "C" int win32_error_to_errno(int win_res);
+#define ERRNO_FROM_WIN32(x) win32_error_to_errno(x)
 #endif
 
 

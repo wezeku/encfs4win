@@ -111,7 +111,7 @@ static int oldStderr = STDERR_FILENO;
 
 static void usage(const char *name) {
   // xgroup(usage)
-  cerr << autosprintf(_("Build: encfs version %s"), VERSION) << "\n\n"
+  cerr << autosprintf(_("Build: encfs4win version %s"), VERSION) << "\n\n"
        // xgroup(usage)
        << autosprintf(
               _("Usage: %s [options] rootDir mountPoint [-- [FUSE Mount "
