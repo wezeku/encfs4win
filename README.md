@@ -34,7 +34,7 @@ Encfs4win has a few dependencies:
 * [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) - For building the project 
 * [Dokan library](https://github.com/dokan-dev/dokany) - Handles FUSE portion of software.  You can use either v0.7.4 or v1.0, though versions before v1.0 should use the USE_LEGACY_DOKAN preprocessor definition. 
 * [Boost library](https://github.com/boostorg/boost) - We currently use the latest (v1.60.0) for our binaries
-* [OpenSSL library](https://github.com/openssl/openssl) - Always use the latest version (currently v1.0.2g).  Note that you must have Perl installed in order to build OpenSSL!)
+* [OpenSSL library](https://github.com/openssl/openssl) - Always use the latest version (currently v1.0.2g).  Note that you must have Perl installed in order to build OpenSSL!
 
 ### Automated version
 
