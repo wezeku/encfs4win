@@ -23,7 +23,7 @@ For more info, see:
 
 ## Installing
 
-Installation is as simple as a few clicks!  Simply download the latest encfs4win installer from [encfs4win/releases](https://github.com/jetwhiz/encfs4win/releases) (encfs4win-setup.msi) and run it.  
+Installation is as simple as a few clicks!  Simply download the latest encfs4win installer from [encfs4win/releases](https://github.com/jetwhiz/encfs4win/releases) (encfs4win-installer.exe) and run it.  
 
 The installer contains everything needed to run encfs on Windows, including the encfs executables, OpenSSL libraries, and all necessary MS Visual C++ libraries. It will also automatically install the Dokan library (if it is not already installed). 
 
@@ -31,11 +31,22 @@ The installer contains everything needed to run encfs on Windows, including the 
 
 Encfs4win has a few dependencies: 
 
-* [Dokan library](https://github.com/dokan-dev/dokany) - handles FUSE portion of software.  You can use either v0.7.4 or v1.0, though versions before v1.0 should use the USE_LEGACY_DOKAN preprocessor definition. 
+* [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) - For building the project 
+* [Dokan library](https://github.com/dokan-dev/dokany) - Handles FUSE portion of software.  You can use either v0.7.4 or v1.0, though versions before v1.0 should use the USE_LEGACY_DOKAN preprocessor definition. 
 * [Boost library](https://github.com/boostorg/boost) - We currently use the latest (v1.60.0) for our binaries
-* [OpenSSL library](https://github.com/openssl/openssl) - Always use the latest version (currently v1.0.2g)
+* [OpenSSL library](https://github.com/openssl/openssl) - Always use the latest version (currently v1.0.2g).  Note that you must have Perl installed in order to build OpenSSL!)
 
-After the above dependencies have been installed and built, simply open the encfs4win solution (encfs/encfs.sln) and build the solution.  This will result in encfs.exe, encfsctl.exe and the rlog binaries being built and placed in the encfs\Release directory. 
+### Automated version
+
+Encfs4win now comes with a fully-automated build tool called "build.bat", located in the root directory. This tool will automatically download, build and install Dokan, Boost and OpenSSL, before finally building encfs and rlog.  Look for "encfs.exe" and "encfsctl.exe" in the encfs\Release folder after building is finished. 
+
+The automated tool will also check to see if any of these prerequisites are already installed (by looking for the DOKAN_ROOT, BOOST_ROOT and OPENSSL_ROOT environment variables).  If found, it will use the installed version and skip over that prerequisite. 
+
+### Manual version
+
+You can also choose to handle some or all of the prerequisites yourself.  After the above dependencies have been installed and built, simply open the encfs4win solution (encfs/encfs.sln) and build the solution.  Note that you must have the environment variables DOKAN_ROOT, BOOST_ROOT and OPENSSL_ROOT pointing to your Dokan, Boost and OpenSSL installations, respectively (otherwise you will need to modify the solution to point to your installations).  
+
+This will result in encfs.exe, encfsctl.exe and the rlog binaries being built and placed in the encfs\Release directory. 
 
 ## Environment
 
