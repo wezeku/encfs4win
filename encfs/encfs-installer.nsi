@@ -3,7 +3,7 @@
  
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "encfs"
-!define PRODUCT_VERSION "1.9.0-RC3"
+!define PRODUCT_VERSION "1.9.0-RC4"
 !define PRODUCT_PUBLISHER "CEMi4"
  
 SetCompressor lzma
@@ -71,8 +71,8 @@ Section "encfs" SEC04
   # Install files
   File "Release\encfs.exe"
   File "Release\encfsctl.exe"
-  File "..\..\encfs-bin\libeay32.dll"
-  File "..\..\encfs-bin\ssleay32.dll"
+  File "$%OPENSSL_ROOT%\bin\libeay32.dll"
+  File "$%OPENSSL_ROOT%\bin\ssleay32.dll"
   
   # Write uninstaller registry keys
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\encfs" "DisplayName" "encfs4win"
