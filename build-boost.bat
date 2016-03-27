@@ -25,15 +25,18 @@ set BOOST_VERSION=1.60.0
 set BOOST_VERSION_STR=1_60
 set MSVC_VERSION=14.0
 set MSVC_VERSION_STR=vc140
-
-set BOOST_INSTALL_DIR=..\boost_%BOOST_VERSION_STR%_0
-set BOOST_INCLUDE_DIR=%BOOST_INSTALL_DIR%\includes
-set BOOST_LIBDIR=%BOOST_INSTALL_DIR%\lib32-msvc-%MSVC_VERSION%
+set BOOST_SOURCE_URI=https://github.com/boostorg/boost.git
 
 
 
 REM ========= DO NOT EDIT BELOW THIS LINE =====================
 
+
+
+REM Define some important paths 
+set BOOST_INSTALL_DIR=..\boost_%BOOST_VERSION_STR%_0
+set BOOST_INCLUDE_DIR=%BOOST_INSTALL_DIR%\includes
+set BOOST_LIBDIR=%BOOST_INSTALL_DIR%\lib32-msvc-%MSVC_VERSION%
 
 
 REM don't bother if they already have a boost installation
@@ -43,7 +46,7 @@ if defined BOOST_ROOT (
       if exist "%BOOST_ROOT%\lib32-msvc-%MSVC_VERSION%\libboost_system-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" (
         goto :boost_already_installed
       )
-	)
+    )
   )
 )
 
@@ -67,7 +70,7 @@ echo ==================================================
 echo             CLONING BOOST REPOSITORY             
 echo ==================================================
 REM git submodule update --init
-git clone --recursive https://github.com/boostorg/boost.git boost >boost-clone.log
+git clone --recursive %BOOST_SOURCE_URI% boost >boost-clone.log
 pushd boost
 git clean -ffdx
 git reset --hard boost-%BOOST_VERSION%

@@ -25,13 +25,16 @@ set OPENSSL_VERSION=1.0.2g
 set OPENSSL_VERSION_STR=1_0_2g
 set MSVC_VERSION=14.0
 set MSVC_VERSION_STR=vc140
-
-set OPENSSL_INSTALL_DIR=openssl-bin
+set OPENSSL_SOURCE_URI=https://github.com/openssl/openssl.git
 
 
 
 REM ========= DO NOT EDIT BELOW THIS LINE =====================
 
+
+
+REM Define some important paths 
+set OPENSSL_INSTALL_DIR=openssl-bin
 
 
 REM don't bother if they already have a openssl installation
@@ -61,7 +64,7 @@ echo ==================================================
 echo            CLONING OPENSSL REPOSITORY             
 echo ==================================================
 REM git submodule update --init
-git clone https://github.com/openssl/openssl.git openssl >openssl-clone.log
+git clone %OPENSSL_SOURCE_URI% openssl >openssl-clone.log
 pushd openssl
 git clean -ffdx
 git reset --hard OpenSSL_%OPENSSL_VERSION_STR%

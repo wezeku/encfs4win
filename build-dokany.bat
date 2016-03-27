@@ -23,6 +23,7 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 REM versioning variables 
 set MSVC_VERSION=14.0
 set MSVC_VERSION_STR=vc140
+set DOKAN_SOURCE_URI=https://github.com/dokan-dev/dokany.git
 
 REM provide legacy dokan support 
 if defined USE_LEGACY_DOKAN (
@@ -64,7 +65,7 @@ echo ==================================================
 echo             CLONING DOKANY REPOSITORY (%DOKANY_VERSION%)            
 echo ==================================================
 REM git submodule update --init
-git clone https://github.com/dokan-dev/dokany.git dokan >dokany-clone.log
+git clone %DOKAN_SOURCE_URI% dokan >dokany-clone.log
 pushd dokan
 git clean -ffdx
 git reset --hard %DOKANY_VERSION%
