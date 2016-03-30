@@ -1,5 +1,5 @@
 @ECHO OFF
-
+REM build.bat
 REM *****************************************************************************
 REM Author:   Charles Munson <jetwhiz@jetwhiz.com>
 REM 
@@ -20,20 +20,40 @@ REM You should have received a copy of the GNU Lesser General Public License
 REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+REM Allow building of encfs4win 2.0
+set ENCFS_MAJOR_VERSION=1
+if /I "%1"=="--beta" set ENCFS_MAJOR_VERSION=2
+
+
+REM Remember the PWD for encfs4win project
+set PROJECT_DIR=%CD%
+
+
 REM Make sure perl is installed 
 perl < nul
 if NOT %ERRORLEVEL% == 0 goto :no_perl
 
 
+REM MSYS is required to build libgcrypt, and we don't know where it is yet 
+if "%ENCFS_MAJOR_VERSION%"=="2" (
+    set MSYS_BIN_DIR=C:\MinGW\msys\1.0\bin
+    if NOT exist "%MSYS_BIN_DIR%\sh.exe" (
+        SET /P MSYS_BIN_DIR=Please input the path to your MSYS bin directory: 
+    )
+    if NOT exist "%MSYS_BIN_DIR%\sh.exe" goto :no_msys
+)
+
 
 REM Make sure MSBUILD is available (and set up environmemt) 
-set DEPS_DIR=%cd%\deps
+set DEPS_DIR=%CD%\deps
 set VCPath=%PROGRAMFILES(x86)%\MSBuild\14.0\Bin
 set PATH=%PATH%;%VCPath%
 set VCTargetsPath=%PROGRAMFILES(x86)%\MSBuild\Microsoft.Cpp\v4.0\V140
 if NOT exist "%VCPath%\msbuild.exe" goto :no_msbuild
 if NOT exist "%PROGRAMFILES(x86)%\Microsoft Visual Studio 14.0\VC\bin\vcvars32.bat" goto :no_msbuild
-call "%PROGRAMFILES(x86)%\Microsoft Visual Studio 14.0\VC\bin\vcvars32.bat"
+if not defined DevEnvDir (
+    call "%PROGRAMFILES(x86)%\Microsoft Visual Studio 14.0\VC\bin\vcvars32.bat"
+)
 
 
 
@@ -42,18 +62,29 @@ call build-openssl.bat
 if NOT %ERRORLEVEL% == 0 goto :no_openssl
 
 
+REM libgpg-error
+if "%ENCFS_MAJOR_VERSION%"=="2" (
+    call build-libgpgerror.bat
+    if NOT %ERRORLEVEL% == 0 goto :no_libgpgerror
+)
+
+
+REM libgcrypt
+if "%ENCFS_MAJOR_VERSION%"=="2" (
+    call build-libgcrypt.bat
+    if NOT %ERRORLEVEL% == 0 goto :no_libgcrypt
+)
+
 
 REM dokany
 call build-dokany.bat
 if NOT %ERRORLEVEL% == 0 goto :no_dokany
 
 
-
 REM boost library
 call build-boost.bat
 if NOT %ERRORLEVEL% == 0 goto :no_boost
 if "%BOOST_ROOT%"=="" goto :no_boost
-
 
 
 REM (Clean,)? Build encfs 
@@ -109,6 +140,19 @@ goto :end
 
 
 
+:no_msys
+
+echo.
+echo ==================================================
+echo     MSYS is required to build this project!
+echo ==================================================
+echo.
+exit /b 1
+
+goto :end
+
+
+
 :no_perl
 
 echo.
@@ -127,6 +171,32 @@ goto :end
 echo.
 echo ==================================================
 echo    OpenSSL could not be built, and is required!
+echo ==================================================
+echo.
+exit /b 1
+
+goto :end
+
+
+
+:no_libgpgerror
+
+echo.
+echo ==================================================
+echo  libgpg-error could not be built, and is required!
+echo ==================================================
+echo.
+exit /b 1
+
+goto :end
+
+
+
+:no_libgcrypt
+
+echo.
+echo ==================================================
+echo   libgcrypt could not be built, and is required!
 echo ==================================================
 echo.
 exit /b 1

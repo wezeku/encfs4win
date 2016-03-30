@@ -1,5 +1,6 @@
 @ECHO OFF
-
+SETLOCAL
+REM build-openssl.bat
 REM *****************************************************************************
 REM Author:   Charles Munson <jetwhiz@jetwhiz.com>
 REM 
@@ -21,9 +22,9 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 REM versioning variables 
-set OPENSSL_VERSION=1.0.2g
-set OPENSSL_VERSION_STR=1_0_2g
-set OPENSSL_SOURCE_URI=https://github.com/openssl/openssl.git
+set VERSION=1.0.2g
+set VERSION_STR=1_0_2g
+set SOURCE_URI=https://github.com/openssl/openssl.git
 
 
 
@@ -31,15 +32,16 @@ REM ========= DO NOT EDIT BELOW THIS LINE =====================
 
 
 
-REM Define some important paths 
-set OPENSSL_INSTALL_DIR=openssl-bin
+REM set up some globally-constant settings
+set SRC_DIR_NAME=openssl
+set INSTALL_DIR=install-dir
 
 
-REM don't bother if they already have a openssl installation
+REM don't bother if they already have an installation
 if defined OPENSSL_ROOT (
   if exist "%OPENSSL_ROOT%\bin\libeay32.dll" (
     if exist "%OPENSSL_ROOT%\bin\ssleay32.dll" (
-      if exist "%OPENSSL_ROOT%\include" (goto :openssl_already_installed)
+      if exist "%OPENSSL_ROOT%\include" (goto :already_installed)
     )
   )
 )
@@ -47,8 +49,8 @@ if defined OPENSSL_ROOT (
 
 REM Failed to find OpenSSL -- ask user if they want us to build it for them
 echo.
-SET /P OPENSSL_CONFIRM_BUILD=OpenSSL (OPENSSL_ROOT) was not detected.  Should we install it now? (Y/n): 
-if /I "%OPENSSL_CONFIRM_BUILD%"=="n" exit /b 1
+SET /P CONFIRM_BUILD=OpenSSL (OPENSSL_ROOT) was not detected.  Should we install it now? (Y/n): 
+if /I "%CONFIRM_BUILD%"=="n" exit /b 1
 
 
 REM move into deps folder 
@@ -56,44 +58,43 @@ if NOT exist "deps" mkdir deps
 pushd deps
 
 
-REM Clone git repository and switch to OPENSSL_VERSION release 
+REM Clone git repository and switch to VERSION release 
 echo.
 echo ==================================================
 echo            CLONING OPENSSL REPOSITORY             
 echo ==================================================
-REM git submodule update --init
-git clone %OPENSSL_SOURCE_URI% openssl >openssl-clone.log
-pushd openssl
+git clone %SOURCE_URI% %SRC_DIR_NAME% > %SRC_DIR_NAME%-clone.log
+pushd %SRC_DIR_NAME%
 git clean -ffdx
-git reset --hard OpenSSL_%OPENSSL_VERSION_STR%
-git checkout OpenSSL_%OPENSSL_VERSION_STR%
+git reset --hard OpenSSL_%VERSION_STR%
+git checkout OpenSSL_%VERSION_STR%
 
-REM build libraries 
+REM build libraries (no assembly) 
 echo.
 echo ==================================================
 echo             BUILDING OPENSSL LIBRARIES             
 echo ==================================================
-perl Configure VC-WIN32 no-asm --prefix="%OPENSSL_INSTALL_DIR%"
+perl Configure VC-WIN32 no-asm --prefix="%INSTALL_DIR%"
 cmd /c ms\do_ms
 nmake -f ms\ntdll.mak
 nmake -f ms\ntdll.mak install
 
 REM verify necessary libraries were successfully installed  
-if NOT exist ".\%OPENSSL_INSTALL_DIR%\bin\libeay32.dll" goto :openssl_build_failure
-if NOT exist ".\%OPENSSL_INSTALL_DIR%\bin\ssleay32.dll" goto :openssl_build_failure
-if NOT exist ".\%OPENSSL_INSTALL_DIR%\include" goto :openssl_build_failure
+if NOT exist ".\%INSTALL_DIR%\bin\libeay32.dll" goto :build_failure
+if NOT exist ".\%INSTALL_DIR%\bin\ssleay32.dll" goto :build_failure
+if NOT exist ".\%INSTALL_DIR%\include" goto :build_failure
 
 REM set OPENSSL_ROOT environment variable 
-pushd %OPENSSL_INSTALL_DIR%
-set OPENSSL_ROOT=%CD%
+pushd %INSTALL_DIR%
+endlocal & set OPENSSL_ROOT=%CD%
 setx OPENSSL_ROOT "%OPENSSL_ROOT%"
 popd
 
-goto :openssl_build_success
+goto :build_success
 
 
 
-:openssl_build_success
+:build_success
 
 echo.
 echo ==================================================
@@ -101,11 +102,11 @@ echo     OpenSSL libraries successfully installed!
 echo ==================================================
 echo.
 
-goto :openssl_end
+goto :build_end
 
 
 
-:openssl_build_failure
+:build_failure
 
 echo.
 echo ==================================================
@@ -114,11 +115,11 @@ echo ==================================================
 echo.
 exit /b 1
 
-goto :openssl_end
+goto :build_end
 
 
 
-:openssl_already_installed
+:already_installed
 
 echo.
 echo ==================================================
@@ -127,11 +128,11 @@ echo ==================================================
 echo.
 exit /b 0
 
-goto :openssl_end
+goto :build_end
 
 
 
-:openssl_end
+:build_end
 popd
 popd
 exit /b 0

@@ -1,5 +1,6 @@
 @ECHO OFF
-
+SETLOCAL
+REM build-boost.bat
 REM *****************************************************************************
 REM Author:   Charles Munson <jetwhiz@jetwhiz.com>
 REM 
@@ -21,11 +22,11 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 REM versioning variables 
-set BOOST_VERSION=1.60.0
-set BOOST_VERSION_STR=1_60
+set VERSION=1.60.0
+set VERSION_STR=1_60
 set MSVC_VERSION=14.0
 set MSVC_VERSION_STR=vc140
-set BOOST_SOURCE_URI=https://github.com/boostorg/boost.git
+set SOURCE_URI=https://github.com/boostorg/boost.git
 
 
 
@@ -33,18 +34,22 @@ REM ========= DO NOT EDIT BELOW THIS LINE =====================
 
 
 
+REM set up some globally-constant settings
+set SRC_DIR_NAME=boost
+
+
 REM Define some important paths 
-set BOOST_INSTALL_DIR=..\boost_%BOOST_VERSION_STR%_0
-set BOOST_INCLUDE_DIR=%BOOST_INSTALL_DIR%\includes
-set BOOST_LIBDIR=%BOOST_INSTALL_DIR%\lib32-msvc-%MSVC_VERSION%
+set INSTALL_DIR=..\boost_%VERSION_STR%_0
+set INCLUDE_DIR=%INSTALL_DIR%\includes
+set LIBDIR=%INSTALL_DIR%\lib32-msvc-%MSVC_VERSION%
 
 
-REM don't bother if they already have a boost installation
+REM don't bother if they already have an installation
 if defined BOOST_ROOT (
-  if exist "%BOOST_ROOT%\lib32-msvc-%MSVC_VERSION%\libboost_filesystem-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" (
-    if exist "%BOOST_ROOT%\lib32-msvc-%MSVC_VERSION%\libboost_serialization-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" (
-      if exist "%BOOST_ROOT%\lib32-msvc-%MSVC_VERSION%\libboost_system-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" (
-        goto :boost_already_installed
+  if exist "%BOOST_ROOT%\lib32-msvc-%MSVC_VERSION%\libboost_filesystem-%MSVC_VERSION_STR%-mt-%VERSION_STR%.lib" (
+    if exist "%BOOST_ROOT%\lib32-msvc-%MSVC_VERSION%\libboost_serialization-%MSVC_VERSION_STR%-mt-%VERSION_STR%.lib" (
+      if exist "%BOOST_ROOT%\lib32-msvc-%MSVC_VERSION%\libboost_system-%MSVC_VERSION_STR%-mt-%VERSION_STR%.lib" (
+        goto :already_installed
       )
     )
   )
@@ -54,8 +59,8 @@ if defined BOOST_ROOT (
 REM Failed to find boost -- ask user if they want us to build it for them
 echo.
 echo Boost (BOOST_ROOT) was not detected.  The Boost library is over 1.5 GB in size and takes a very long time to build. 
-SET /P BOOST_CONFIRM_BUILD=Should we download and install it now? (y/N): 
-if /I "%BOOST_CONFIRM_BUILD%" NEQ "y" exit /b 1
+SET /P CONFIRM_BUILD=Should we download and install it now? (y/N): 
+if /I "%CONFIRM_BUILD%" NEQ "y" exit /b 1
 
 
 REM move into deps folder 
@@ -63,18 +68,17 @@ if NOT exist "deps" mkdir deps
 pushd deps
 
 
-REM Clone git repository and switch to BOOST_VERSION release 
+REM Clone git repository and switch to VERSION release 
 REM cloned size is ~1.3 GB
 echo.
 echo ==================================================
 echo             CLONING BOOST REPOSITORY             
 echo ==================================================
-REM git submodule update --init
-git clone --recursive %BOOST_SOURCE_URI% boost >boost-clone.log
-pushd boost
+git clone --recursive %SOURCE_URI% %SRC_DIR_NAME% > %SRC_DIR_NAME%-clone.log
+pushd %SRC_DIR_NAME%
 git clean -ffdx
-git reset --hard boost-%BOOST_VERSION%
-git checkout boost-%BOOST_VERSION%
+git reset --hard boost-%VERSION%
+git checkout boost-%VERSION%
 
 REM build libraries (built size is ~2 GB) 
 echo.
@@ -86,36 +90,36 @@ cmd /c .\bootstrap --with-libraries=filesystem,serialization,system
 .\b2 -d+1 --with-filesystem --with-serialization --with-system toolset=msvc-%MSVC_VERSION% variant=release link=static address-model=32 threading=multi
 
 REM verify necessary libraries were successfully built 
-if NOT exist ".\bin.v2\libs\filesystem\build\msvc-%MSVC_VERSION%\release\link-static\threading-multi\libboost_filesystem-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" goto :boost_build_failure
-if NOT exist ".\bin.v2\libs\serialization\build\msvc-%MSVC_VERSION%\release\link-static\threading-multi\libboost_serialization-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" goto :boost_build_failure
-if NOT exist ".\bin.v2\libs\system\build\msvc-%MSVC_VERSION%\release\link-static\threading-multi\libboost_system-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" goto :boost_build_failure
+if NOT exist ".\bin.v2\libs\filesystem\build\msvc-%MSVC_VERSION%\release\link-static\threading-multi\libboost_filesystem-%MSVC_VERSION_STR%-mt-%VERSION_STR%.lib" goto :build_failure
+if NOT exist ".\bin.v2\libs\serialization\build\msvc-%MSVC_VERSION%\release\link-static\threading-multi\libboost_serialization-%MSVC_VERSION_STR%-mt-%VERSION_STR%.lib" goto :build_failure
+if NOT exist ".\bin.v2\libs\system\build\msvc-%MSVC_VERSION%\release\link-static\threading-multi\libboost_system-%MSVC_VERSION_STR%-mt-%VERSION_STR%.lib" goto :build_failure
 
 REM install boost 
 echo.
 echo ==================================================
 echo              INSTALLING BOOST LIBRARIES             
 echo ==================================================
-.\b2 -d+1 --prefix=%BOOST_INSTALL_DIR% --with-filesystem --with-serialization --with-system --includedir=%BOOST_INCLUDE_DIR% --libdir=%BOOST_LIBDIR% toolset=msvc-%MSVC_VERSION% variant=release link=static address-model=32 threading=multi install
+.\b2 -d+1 --prefix=%INSTALL_DIR% --with-filesystem --with-serialization --with-system --includedir=%INCLUDE_DIR% --libdir=%LIBDIR% toolset=msvc-%MSVC_VERSION% variant=release link=static address-model=32 threading=multi install
 
 REM verify necessary libraries were successfully installed  
-if NOT exist "%BOOST_LIBDIR%\libboost_filesystem-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" (
-  goto :boost_build_failure)
-if NOT exist "%BOOST_LIBDIR%\libboost_serialization-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" (
-  goto :boost_build_failure)
-if NOT exist "%BOOST_LIBDIR%\libboost_system-%MSVC_VERSION_STR%-mt-%BOOST_VERSION_STR%.lib" (
-  goto :boost_build_failure)
+if NOT exist "%LIBDIR%\libboost_filesystem-%MSVC_VERSION_STR%-mt-%VERSION_STR%.lib" (
+  goto :build_failure)
+if NOT exist "%LIBDIR%\libboost_serialization-%MSVC_VERSION_STR%-mt-%VERSION_STR%.lib" (
+  goto :build_failure)
+if NOT exist "%LIBDIR%\libboost_system-%MSVC_VERSION_STR%-mt-%VERSION_STR%.lib" (
+  goto :build_failure)
 
 REM set BOOST_ROOT environment variable 
-pushd %BOOST_INSTALL_DIR%
-set BOOST_ROOT=%CD%
+pushd %INSTALL_DIR%
+endlocal & set BOOST_ROOT=%CD%
 setx BOOST_ROOT "%BOOST_ROOT%"
 popd
 
-goto :boost_build_success
+goto :build_success
 
 
 
-:boost_build_success
+:build_success
 
 echo.
 echo ==================================================
@@ -123,11 +127,11 @@ echo      Boost libraries successfully installed!
 echo ==================================================
 echo.
 
-goto :boost_end
+goto :build_end
 
 
 
-:boost_build_failure
+:build_failure
 
 echo.
 echo ==================================================
@@ -136,11 +140,11 @@ echo ==================================================
 echo.
 exit /b 1
 
-goto :boost_end
+goto :build_end
 
 
 
-:boost_already_installed
+:already_installed
 
 echo.
 echo ==================================================
@@ -149,11 +153,11 @@ echo ==================================================
 echo.
 exit /b 0
 
-goto :boost_end
+goto :build_end
 
 
 
-:boost_end
+:build_end
 popd
 popd
 exit /b 0

@@ -1,0 +1,15 @@
+diff --git a/Makefile.am b/Makefile.am
+index bc0e5c5..aee2d6c 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -24,8 +24,8 @@ DISTCHECK_CONFIGURE_FLAGS = --disable-random-daemon \
+ # (A suitable gitlog-to-changelog script can be found in GnuPG master.)
+ GITLOG_TO_CHANGELOG=gitlog-to-changelog
+ 
+-DIST_SUBDIRS = m4 compat mpi cipher random src doc tests
+-SUBDIRS =         compat mpi cipher random src doc tests
++DIST_SUBDIRS = m4 compat mpi cipher random src tests
++SUBDIRS =         compat mpi cipher random src tests
+ 
+ EXTRA_DIST = autogen.sh autogen.rc README.GIT LICENSES      	           \
+              ChangeLog-2011 build-aux/ChangeLog-2011 doc/ChangeLog-2011    \

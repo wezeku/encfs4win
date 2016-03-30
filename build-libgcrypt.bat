@@ -1,6 +1,6 @@
 @ECHO OFF
 SETLOCAL
-REM build-dokany.bat
+REM build-libgcrypt.bat
 REM *****************************************************************************
 REM Author:   Charles Munson <jetwhiz@jetwhiz.com>
 REM 
@@ -22,19 +22,9 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 REM versioning variables 
-set SOURCE_URI=https://github.com/dokan-dev/dokany.git
-
-REM Allow user to choose to use legacy dokan or not 
-set USE_LEGACY_DOKAN=
-
-REM provide legacy dokan support 
-if defined USE_LEGACY_DOKAN (
-  set VERSION=v0.7.4
-  set VERSION_STR=0.7.4
-) else (
-  set VERSION=v1.0.0-RC2
-  set VERSION_STR=1.0.0
-)
+set VERSION=1.6.5
+set VERSION_STR=1.6.5
+set SOURCE_URI=git://git.gnupg.org/libgcrypt.git
 
 
 
@@ -43,20 +33,23 @@ REM ========= DO NOT EDIT BELOW THIS LINE =====================
 
 
 REM set up some globally-constant settings
-set SRC_DIR_NAME=dokan
+set SRC_DIR_NAME=libgcrypt
+set INSTALL_DIR=%CD%\deps\%SRC_DIR_NAME%\install-dir
 
 
 REM don't bother if they already have an installation
-if defined DOKAN_ROOT (
-  if exist "%DOKAN_ROOT%\Win32\Release\dokan1.lib" (
-    if exist "%DOKAN_ROOT%\Win32\Release\dokanfuse1.lib" (goto :already_installed)
+if defined INSTALL_DIR (
+  if exist "%INSTALL_DIR%\bin\libgcrypt-20.dll" (
+    if exist "%INSTALL_DIR%\lib\libgcrypt.dll.a" (
+      if exist "%INSTALL_DIR%\include\gcrypt.h" (goto :already_installed)
+    )
   )
 )
 
 
-REM Failed to find dokan -- ask user if they want us to build it for them
+REM Failed to find libgcrypt -- ask user if they want us to build it for them
 echo.
-SET /P CONFIRM_BUILD=Dokan (DOKAN_ROOT) was not detected.  Should we install it now? (Y/n): 
+SET /P CONFIRM_BUILD=libgcrypt was not detected.  Should we install it now? (Y/n): 
 if /I "%CONFIRM_BUILD%"=="n" exit /b 1
 
 
@@ -66,51 +59,32 @@ pushd deps
 
 
 REM Clone git repository and switch to VERSION release 
+REM   must check out code in lf line-ending mode for MSYS support 
 echo.
 echo ==================================================
-echo             CLONING DOKANY REPOSITORY (%VERSION%)            
+echo           CLONING LIBGCRYPT REPOSITORY             
 echo ==================================================
 git clone %SOURCE_URI% %SRC_DIR_NAME% > %SRC_DIR_NAME%-clone.log
 pushd %SRC_DIR_NAME%
+git config core.autocrlf false
+git config core.eol lf
 git clean -ffdx
-git reset --hard %VERSION%
-git checkout %VERSION%
-
-REM upgrade legacy solution 
-if defined USE_LEGACY_DOKAN (
-  echo.
-  echo ~~~~~ Upgrading legacy solution ~~~~~
-  echo.
-  cmd /c devenv "dokan.sln" /upgrade
-)
+git reset --hard libgcrypt-%VERSION_STR%
+git checkout libgcrypt-%VERSION_STR%
 
 REM build libraries 
 echo.
 echo ==================================================
-echo              BUILDING DOKANY LIBRARIES             
+echo           BUILDING LIBGCRYPT LIBRARIES             
 echo ==================================================
-if defined USE_LEGACY_DOKAN (
-  msbuild dokan.sln /p:PlatformToolset=v140  /p:ForceImportBeforeCppTargets="%DEPS_DIR%\dokan-legacy.props" /p:Configuration=Release /p:Platform=Win32 /t:Clean,Build
-) else (
-  msbuild dokan.sln /p:Configuration=Release /p:Platform=Win32 /t:Clean,Build
-)
+cmd /c %MSYS_BIN_DIR%\sh.exe --login -i "%PROJECT_DIR%\build-libgcrypt.sh"
 
-REM verify necessary libraries were successfully built 
-if defined USE_LEGACY_DOKAN (
-  if NOT exist ".\Win32\Release\dokan.lib" goto :build_failure
-  if NOT exist ".\Win32\Release\dokanfuse.lib" goto :build_failure
-  copy ".\Win32\Release\dokan.lib" ".\Win32\Release\dokan1.lib"
-  copy ".\Win32\Release\dokanfuse.lib" ".\Win32\Release\dokanfuse1.lib"
-) else (
-  if NOT exist ".\Win32\Release\dokan1.lib" goto :build_failure
-  if NOT exist ".\Win32\Release\dokan1.dll" goto :build_failure
-  if NOT exist ".\Win32\Release\dokanfuse1.lib" goto :build_failure
-  if NOT exist ".\Win32\Release\dokanfuse1.dll" goto :build_failure
-)
 
-REM set DOKAN_ROOT environment variable 
-endlocal & set DOKAN_ROOT=%CD%
-setx DOKAN_ROOT "%DOKAN_ROOT%"
+REM verify necessary libraries were successfully installed  
+if NOT exist "%INSTALL_DIR%\bin\libgcrypt-20.dll" goto :build_failure
+if NOT exist "%INSTALL_DIR%\lib\libgcrypt.dll.a" goto :build_failure
+if NOT exist "%INSTALL_DIR%\include\gcrypt.h" goto :build_failure
+
 
 goto :build_success
 
@@ -120,7 +94,7 @@ goto :build_success
 
 echo.
 echo ==================================================
-echo      Dokan library successfully installed! 
+echo    libgcrypt libraries successfully installed! 
 echo ==================================================
 echo.
 
@@ -132,9 +106,11 @@ goto :build_end
 
 echo.
 echo ==================================================
-echo     Failed to build necessary Dokan library! 
+echo       Failed to build libgcrypt libraries
 echo ==================================================
 echo.
+popd
+popd
 exit /b 1
 
 goto :build_end
@@ -145,7 +121,7 @@ goto :build_end
 
 echo.
 echo ==================================================
-echo            Dokan already installed
+echo           libgcrypt already installed
 echo ==================================================
 echo.
 exit /b 0
