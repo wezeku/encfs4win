@@ -23,8 +23,6 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 REM versioning variables 
 set OPENSSL_VERSION=1.0.2g
 set OPENSSL_VERSION_STR=1_0_2g
-set MSVC_VERSION=14.0
-set MSVC_VERSION_STR=vc140
 set OPENSSL_SOURCE_URI=https://github.com/openssl/openssl.git
 
 

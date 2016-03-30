@@ -20,12 +20,6 @@ REM You should have received a copy of the GNU Lesser General Public License
 REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-REM Allow user to choose to use legacy dokan or not 
-set USE_LEGACY_DOKAN=
-
-
-
 REM Make sure perl is installed 
 perl < nul
 if NOT %ERRORLEVEL% == 0 goto :no_perl
@@ -67,11 +61,7 @@ echo.
 echo ==================================================
 echo                   BUILDING ENCFS             
 echo ==================================================
-if defined USE_LEGACY_DOKAN (
-  msbuild encfs/encfs.sln /p:ForceImportBeforeCppTargets="%cd%\encfs\legacy.props" /p:Configuration=Release /p:Platform=x86 /t:Clean,Build
-) else (
-  msbuild encfs/encfs.sln /p:Configuration=Release /p:Platform=x86 /t:Clean,Build
-)
+msbuild encfs/encfs.sln /p:Configuration=Release /p:Platform=x86 /t:Clean,Build
 
 REM verify necessary executables were successfully installed  
 if NOT exist ".\encfs\Release\encfs.exe" goto :build_failure

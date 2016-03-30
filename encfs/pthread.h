@@ -3,6 +3,7 @@
 
 #include "encfs.h"
 #include "fuse_win.h"
+#include "fusemain.h"
 #include <windows.h>
 #include <stdio.h>
 #include <io.h>
@@ -13,7 +14,8 @@
 
 
 // backwards compatability between dokan 0.7 and more modern versions 
-#if defined(USE_LEGACY_DOKAN)
+#if DOKAN_VERSION > 700
+#define USE_LEGACY_DOKAN
 #define stat_st _stati64
 #define ERRNO_FROM_WIN32(x) win32_error_to_errno(x)
 #else

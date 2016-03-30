@@ -21,9 +21,10 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 REM versioning variables 
-set MSVC_VERSION=14.0
-set MSVC_VERSION_STR=vc140
 set DOKAN_SOURCE_URI=https://github.com/dokan-dev/dokany.git
+
+REM Allow user to choose to use legacy dokan or not 
+set USE_LEGACY_DOKAN=
 
 REM provide legacy dokan support 
 if defined USE_LEGACY_DOKAN (
