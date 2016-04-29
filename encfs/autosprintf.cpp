@@ -27,12 +27,10 @@
 /* Specification.  */
 #include "autosprintf.h"
 
-#include <stdarg.h>
-#include <stdarg.h>
-//#include "lib-asprintf.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdarg.h>  // for va_list
+#include <stdio.h>   // for NULL, vasprintf
+#include <stdlib.h>  // for free
+#include <string.h>  // for strdup
 
 extern "C" int vasprintf(char **ret, const char *fmt, va_list ap);
 

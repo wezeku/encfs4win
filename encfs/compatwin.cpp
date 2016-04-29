@@ -1,11 +1,3 @@
-//#include <windows.h>
-//#include <errno.h>
-//#include <stdio.h>
-//#include <io.h>
-//#include <unistd.h>
-//#include <fcntl.h>
-//#include <fuse.h>
-
 #include "encfs.h"
 #include "pthread.h"
 
@@ -18,7 +10,6 @@
 #include <winioctl.h>
 #include <direct.h>
 #include <vector>
-#include "rlog/rlog.h"
 
 time_t filetimeToUnixTime(const FILETIME *ft);
 
@@ -140,21 +131,21 @@ extern "C" int errno_to_win32_error(int err)
 
 int unix::fsync(int fd)
 {
-	rDebug("NOTIFY -- unix::fsync");
+	VLOG(1) << "NOTIFY -- unix::fsync";
 	FlushFileBuffers((HANDLE) _get_osfhandle(fd));
 	return 0;
 }
 
 int unix::fdatasync(int fd)
 {
-	rDebug("NOTIFY -- unix::fdatasync");
+	VLOG(1) << "NOTIFY -- unix::fdatasync";
 	FlushFileBuffers((HANDLE) _get_osfhandle(fd));
 	return 0;
 }
 
 ssize_t unix::pread(int fd, void *buf, size_t count, __int64 offset)
 {
-	rDebug("NOTIFY -- unix::pread");
+	VLOG(1) << "NOTIFY -- unix::pread";
 	HANDLE h = (HANDLE) _get_osfhandle(fd);
 	if (h == INVALID_HANDLE_VALUE) {
 		errno = EINVAL;
@@ -176,7 +167,7 @@ ssize_t unix::pread(int fd, void *buf, size_t count, __int64 offset)
 
 ssize_t unix::pwrite(int fd, const void *buf, size_t count, __int64 offset)
 {
-	rDebug("NOTIFY -- unix::pwrite");
+	VLOG(1) << "NOTIFY -- unix::pwrite";
 	HANDLE h = (HANDLE) _get_osfhandle(fd);
 	if (h == INVALID_HANDLE_VALUE) {
 		errno = EINVAL;
@@ -196,7 +187,7 @@ ssize_t unix::pwrite(int fd, const void *buf, size_t count, __int64 offset)
 
 static int truncate_handle(HANDLE fd, __int64 length)
 {
-	rDebug("NOTIFY -- truncate_handle");
+	VLOG(1) << "NOTIFY -- truncate_handle";
 	LONG high = length >> 32;
 	if (!SetFilePointer(fd, (LONG) length, &high, FILE_BEGIN)
 	    || !SetEndOfFile(fd) ) {
@@ -209,14 +200,14 @@ static int truncate_handle(HANDLE fd, __int64 length)
 
 int unix::ftruncate(int fd, __int64 length)
 {
-	rDebug("NOTIFY -- unix::ftruncate");
+	VLOG(1) << "NOTIFY -- unix::ftruncate";
 	HANDLE h = (HANDLE) _get_osfhandle(fd);
 	return truncate_handle(h, length);
 }
 
 int unix::truncate(const char *path, __int64 length)
 {
-	rDebug("NOTIFY -- unix::truncate");
+	VLOG(1) << "NOTIFY -- unix::truncate";
 	std::wstring fn(utf8_to_wfn(path));
 	HANDLE fd = CreateFileW(fn.c_str(), GENERIC_WRITE|GENERIC_READ, FILE_SHARE_DELETE, NULL, OPEN_EXISTING, 0, NULL);
 
@@ -403,7 +394,7 @@ timevalToFiletime(struct timeval t)
 int
 unix::utimes(const char *filename, const struct timeval times[2])
 {
-	rDebug("NOTIFY -- unix::utimes");
+	VLOG(1) << "NOTIFY -- unix::utimes";
 	std::wstring fn(utf8_to_wfn(filename));
 	HANDLE h = CreateFileW(fn.c_str(), FILE_WRITE_ATTRIBUTES, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 	if (h == INVALID_HANDLE_VALUE)
@@ -427,7 +418,7 @@ unix::utimes(const char *filename, const struct timeval times[2])
 int
 unix::statvfs(const char *path, struct statvfs *fs)
 {
-	rDebug("NOTIFY -- unix::statvfs");
+	VLOG(1) << "NOTIFY -- unix::statvfs";
 	fs->f_bsize = 4096;
 	fs->f_frsize = 4096;
 	fs->f_fsid = 0;
@@ -461,7 +452,7 @@ set_sparse(HANDLE fd)
 int
 my_open(const char *fn_utf8, int flags)
 {
-	rDebug("NOTIFY -- my_open");
+	VLOG(1) << "NOTIFY -- my_open";
 	std::wstring fn = utf8_to_wfn(fn_utf8);
 	HANDLE f = CreateFileW(fn.c_str(), flags == O_RDONLY ? GENERIC_READ : GENERIC_WRITE|GENERIC_READ, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 	if (f == INVALID_HANDLE_VALUE) {
@@ -480,14 +471,14 @@ my_open(const char *fn_utf8, int flags)
 		CloseHandle(f);
 		return -1;
 	}
-	rDebug("END NOTIFY -- my_open");
+	VLOG(1) << "END NOTIFY -- my_open";
 	return fd;
 }
 
 int
 unix::open(const char *fn, int flags, ...)
 {
-	rDebug("NOTIFY -- unix::open");
+	VLOG(1) << "NOTIFY -- unix::open";
 	int mode = 0;
 	va_list ap;
 	va_start(ap, flags);
@@ -500,7 +491,7 @@ unix::open(const char *fn, int flags, ...)
 int
 unix::utime(const char *filename, struct utimbuf *times)
 {
-	rDebug("NOTIFY -- unix::utime");
+	VLOG(1) << "NOTIFY -- unix::utime";
 	if (!times)
 		return unix::utimes(filename, NULL);
 	
@@ -515,7 +506,7 @@ unix::utime(const char *filename, struct utimbuf *times)
 int
 unix::mkdir(const char *fn, int mode)
 {
-	rDebug("NOTIFY -- unix::mkdir");
+	VLOG(1) << "NOTIFY -- unix::mkdir";
 	if (CreateDirectoryW(utf8_to_wfn(fn).c_str(), NULL))
 		return 0;
 	errno = ERRNO_FROM_WIN32(GetLastError());
@@ -525,7 +516,7 @@ unix::mkdir(const char *fn, int mode)
 int
 unix::rename(const char *oldpath, const char *newpath)
 {
-	rDebug("NOTIFY -- unix::rename");
+	VLOG(1) << "NOTIFY -- unix::rename";
 	if (MoveFileW(utf8_to_wfn(oldpath).c_str(), utf8_to_wfn(newpath).c_str()))
 		return 0;
 	errno = ERRNO_FROM_WIN32(GetLastError());
@@ -535,7 +526,7 @@ unix::rename(const char *oldpath, const char *newpath)
 int
 unix::unlink(const char *path)
 {
-	rDebug("NOTIFY -- unix::unlink");
+	VLOG(1) << "NOTIFY -- unix::unlink";
 	if (DeleteFileW(utf8_to_wfn(path).c_str()))
 		return 0;
 	errno = ERRNO_FROM_WIN32(GetLastError());
@@ -545,7 +536,7 @@ unix::unlink(const char *path)
 int
 unix::rmdir(const char *path)
 {
-	rDebug("NOTIFY -- unix::rmdir");
+	VLOG(1) << "NOTIFY -- unix::rmdir";
 	if (RemoveDirectoryW(utf8_to_wfn(path).c_str()))
 		return 0;
 	errno = ERRNO_FROM_WIN32(GetLastError());
@@ -555,7 +546,7 @@ unix::rmdir(const char *path)
 int
 unix::stat(const char *path, struct stat_st *buffer)
 {
-	rDebug("NOTIFY -- unix::stat");
+	VLOG(1) << "NOTIFY -- unix::stat";
 	std::wstring fn = utf8_to_wfn(path).c_str();
 	if (fn.length() && fn[fn.length()-1] == L'\\')
 		fn.resize(fn.length()-1);
@@ -611,7 +602,7 @@ unix::stat(const char *path, struct stat_st *buffer)
 int
 unix::chmod(const char* path, int mode)
 {
-	rDebug("NOTIFY -- unix::chmod");
+	VLOG(1) << "NOTIFY -- unix::chmod";
 	return _wchmod(utf8_to_wfn(path).c_str(), mode);
 }
 
@@ -626,7 +617,7 @@ struct unix::DIR
 unix::DIR*
 unix::opendir(const char *name)
 {
-	rDebug("NOTIFY -- unix::opendir");
+	VLOG(1) << "NOTIFY -- unix::opendir";
 	unix::DIR *dir = (unix::DIR*) malloc(sizeof(unix::DIR));
 	if (!dir) {
 		errno = ENOMEM;
@@ -650,7 +641,7 @@ unix::opendir(const char *name)
 int
 unix::closedir(unix::DIR* dir)
 {
-	rDebug("NOTIFY -- unix::closedir");
+	VLOG(1) << "NOTIFY -- unix::closedir";
 	errno = 0;
 	if (dir && dir->hff != INVALID_HANDLE_VALUE)
 		FindClose(dir->hff);
@@ -664,7 +655,7 @@ std::string wchar_to_utf8_cstr(const wchar_t *str);
 struct unix::dirent*
 unix::readdir(unix::DIR* dir)
 {
-	rDebug("NOTIFY -- unix::readdir");
+	VLOG(1) << "NOTIFY -- unix::readdir";
 	errno = EBADF;
 	if (!dir) return NULL;
 	errno = 0;
@@ -685,7 +676,7 @@ unix::readdir(unix::DIR* dir)
 std::wstring
 utf8_to_wfn(const std::string& src)
 {
-	rDebug("NOTIFY -- utf8_to_wfn");
+	VLOG(1) << "NOTIFY -- utf8_to_wfn";
 	int len = src.length()+1;
 	const size_t addSpace = 6;
 	std::vector<wchar_t> buf(len + addSpace);

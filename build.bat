@@ -81,6 +81,11 @@ call build-tinyxml2.bat
 if NOT %ERRORLEVEL% == 0 goto :no_tinyxml2
 
 
+REM easyloggingpp
+call build-easyloggingpp.bat
+if NOT %ERRORLEVEL% == 0 goto :no_easyloggingpp
+
+
 REM dokany
 call build-dokany.bat
 if NOT %ERRORLEVEL% == 0 goto :no_dokany
@@ -209,6 +214,19 @@ goto :end
 echo.
 echo ==================================================
 echo   tinyxml2 could not be built, and is required!
+echo ==================================================
+echo.
+exit /b 1
+
+goto :end
+
+
+
+:no_easyloggingpp
+
+echo.
+echo ==================================================
+echo easylogging++ could not be built, and is required!
 echo ==================================================
 echo.
 exit /b 1

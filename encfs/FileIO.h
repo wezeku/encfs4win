@@ -28,6 +28,8 @@
 #include "Interface.h"
 #include "encfs.h"
 
+namespace encfs {
+
 struct IORequest {
   off_t offset;
 
@@ -45,6 +47,7 @@ class FileIO {
   FileIO();
   virtual ~FileIO();
 
+  virtual Interface getInterface() const = 0;
 
   // default implementation returns 1, meaning this is not block oriented.
   virtual int blockSize() const;
@@ -76,5 +79,7 @@ class FileIO {
   FileIO(const FileIO &);
   FileIO &operator=(const FileIO &);
 };
+
+}  // namespace encfs
 
 #endif

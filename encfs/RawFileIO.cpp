@@ -21,22 +21,25 @@
 #ifdef linux
 #define _XOPEN_SOURCE 500  // pick up pread , pwrite
 #endif
-#include <fcntl.h>
-#include <inttypes.h>
-#include "rlog/rlog.h"
-#include <sys/stat.h>
-#include "unistd.h"
+#include "easylogging++.h"
 #include <cerrno>
 #include <cstring>
+#include <fcntl.h>
+#include <inttypes.h>
+#include <sys/stat.h>
+#include "unistd.h"
 
+#include "Error.h"
 #include "FileIO.h"
 #include "RawFileIO.h"
 
 using namespace std;
 
-static rel::Interface RawFileIO_iface("FileIO/Raw", 1, 0, 0);
+namespace encfs {
 
-FileIO *NewRawFileIO(const rel::Interface &iface) {
+static Interface RawFileIO_iface("FileIO/Raw", 1, 0, 0);
+
+FileIO *NewRawFileIO(const Interface &iface) {
   (void)iface;
   return new RawFileIO();
 }
@@ -70,7 +73,7 @@ RawFileIO::~RawFileIO() {
   if (_fd != -1) unix::close(_fd);
 }
 
-rel::Interface RawFileIO::_interface() const { return RawFileIO_iface; }
+Interface RawFileIO::getInterface() const { return RawFileIO_iface; }
 
 /*
     We shouldn't have to support all possible open flags, so untaint the flags
@@ -83,14 +86,13 @@ rel::Interface RawFileIO::_interface() const { return RawFileIO_iface; }
 */
 int RawFileIO::open(int flags) {
   bool requestWrite = ((flags & O_RDWR) || (flags & O_WRONLY));
-
-  rDebug("open call for %s file", requestWrite ? "writable" : "read only");
+  VLOG(1) << "open call, requestWrite = " << requestWrite;
 
   int result = 0;
 
   // if we have a descriptor and it is writable, or we don't need writable..
   if ((fd >= 0) && (canWrite || !requestWrite)) {
-    rDebug("using existing file descriptor");
+    VLOG(1) << "using existing file descriptor";
     result = fd;  // success
   } else {
     int finalFlags = requestWrite ? O_RDWR : O_RDONLY;
@@ -105,12 +107,12 @@ int RawFileIO::open(int flags) {
 
     int newFd = ::my_open(name.c_str(), finalFlags);
 
-    rDebug("open file with flags %i, result = %i", finalFlags, newFd);
+    VLOG(1) << "open file with flags " << finalFlags << ", result = " << newFd;
 
     if (newFd >= 0) {
       if (oldfd >= 0) {
-        rError("leaking FD?: oldfd = %i, fd = %i, newfd = %i", oldfd, fd,
-               newFd);
+        RLOG(ERROR) << "leaking FD?: oldfd = " << oldfd << ", fd = " << fd
+                    << ", newfd = " << newFd;
       }
 
       // the old fd might still be in use, so just keep it around for
@@ -120,11 +122,9 @@ int RawFileIO::open(int flags) {
       result = fd = newFd;
     } else {
       result = -errno;
-      rInfo("::open error: %s", strerror(errno));
+      RLOG(INFO) << "::open error: " << strerror(errno);
     }
   }
-
-  if (result < 0) rInfo("file %s open failure: %i", name.c_str(), -result);
 
   return result;
 }
@@ -133,7 +133,9 @@ int RawFileIO::getAttr(struct stat_st *stbuf) const {
   int res = unix::lstat(name.c_str(), stbuf);
   int eno = errno;
 
-  if (res < 0) rInfo("getAttr error on %s: %s", name.c_str(), strerror(eno));
+  if (res < 0) {
+    RLOG(INFO) << "getAttr error on " << name << ": " << strerror(eno);
+  }
 
   return (res < 0) ? -eno : 0;
 }
@@ -153,7 +155,7 @@ off_t RawFileIO::getSize() const {
       const_cast<RawFileIO *>(this)->knownSize = true;
       return fileSize;
     } else {
-      rError("getSize on %s failed: %s", name.c_str(), strerror(errno));
+      RLOG(ERROR) << "getSize on " << name << " failed: " << strerror(errno);
       return -1;
     }
   } else {
@@ -167,8 +169,8 @@ ssize_t RawFileIO::read(const IORequest &req) const {
   ssize_t readSize = unix::pread(fd, req.data, req.dataLen, req.offset);
 
   if (readSize < 0) {
-    rInfo("read failed at offset %" PRIi64 " for %i bytes: %s", req.offset,
-          req.dataLen, strerror(errno));
+    RLOG(INFO) << "read failed at offset " << req.offset << " for "
+               << req.dataLen << " bytes: " << strerror(errno);
   }
 
   return readSize;
@@ -188,8 +190,8 @@ bool RawFileIO::write(const IORequest &req) {
 
     if (writeSize < 0) {
       knownSize = false;
-      rInfo("write failed at offset %" PRIi64 " for %i bytes: %s", offset,
-            (int)bytes, strerror(errno));
+      RLOG(INFO) << "write failed at offset " << offset << " for " << bytes
+                 << " bytes: " << strerror(errno);
       return false;
     }
 
@@ -200,8 +202,8 @@ bool RawFileIO::write(const IORequest &req) {
   }
 
   if (bytes != 0) {
-    rError("Write error: wrote %i bytes of %i, max retries reached\n",
-           (int)(req.dataLen - bytes), req.dataLen);
+    RLOG(ERROR) << "Write error: wrote " << req.dataLen - bytes << " bytes of "
+                << req.dataLen << ", max retries reached";
     knownSize = false;
     return false;
   } else {
@@ -228,8 +230,8 @@ int RawFileIO::truncate(off_t size) {
 
   if (res < 0) {
     int eno = errno;
-    rInfo("truncate failed for %s (%i) size %" PRIi64 ", error %s",
-          name.c_str(), fd, size, strerror(eno));
+    RLOG(INFO) << "truncate failed for " << name << " (" << fd << ") size "
+               << size << ", error " << strerror(eno);
     res = -eno;
     knownSize = false;
   } else {
@@ -242,3 +244,5 @@ int RawFileIO::truncate(off_t size) {
 }
 
 bool RawFileIO::isWritable() const { return canWrite; }
+
+}  // namespace encfs

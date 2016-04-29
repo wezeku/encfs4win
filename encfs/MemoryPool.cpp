@@ -20,9 +20,9 @@
 
 #include "MemoryPool.h"
 
+#include <cstring>
 #include <openssl/ossl_typ.h>
 #include "pthread.h"
-#include <cstring>
 
 #ifdef HAVE_VALGRIND_MEMCHECK_H
 #include <valgrind/memcheck.h>
@@ -33,7 +33,9 @@
 
 #include <openssl/buffer.h>
 
-#define BLOCKDATA(BLOCK) (unsigned char *) BLOCK->data->data
+#define BLOCKDATA(BLOCK) (unsigned char *)BLOCK->data->data
+
+namespace encfs {
 
 struct BlockList {
   BlockList *next;
@@ -60,11 +62,6 @@ static void freeBlock(BlockList *el) {
 
 static pthread_mutex_t gMPoolMutex;
 static BlockList *gMemPool = NULL;
-
-void init_mpool_mutex()
-{
-	pthread_mutex_init(&gMPoolMutex, 0);
-}
 
 MemBlock MemoryPool::allocate(int size) {
   pthread_mutex_lock(&gMPoolMutex);
@@ -129,3 +126,5 @@ void MemoryPool::destroyAll() {
     block = next;
   }
 }
+
+}  // namespace encfs

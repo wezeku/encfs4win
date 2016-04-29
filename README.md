@@ -23,14 +23,15 @@ The installer contains everything needed to run encfs on Windows, including the 
 
 Encfs4win has a few dependencies: 
 
-* [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) - For building the project 
-* [Dokan library](https://github.com/dokan-dev/dokany) - Handles FUSE portion of software.  You can use either v0.7.4 (legacy) or v1.0.0 (latest). 
-* [TinyXML2 library](https://github.com/leethomason/tinyxml2) - Reads and writes configuration file for encfs
+* [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) - For building the project.
+* [Dokan library](https://github.com/dokan-dev/dokany) - Handles FUSE portion of software.  You can use either legacy (e.g., v0.7.4) or latest (v1.0). 
+* [TinyXML2 library](https://github.com/leethomason/tinyxml2) - Reads and writes configuration files for encfs.
+* [Easylogging++](https://github.com/easylogging/easyloggingpp) - Provides logging functionality. 
 * [OpenSSL library](https://github.com/openssl/openssl) - Always use the latest version (currently v1.0.2g).  Note that you must have Perl installed in order to build OpenSSL!
 
 ### Automated version
 
-Encfs4win now comes with a fully-automated build tool called "build.bat", located in the root directory. This tool will automatically download, build and install Dokan, Boost and OpenSSL, before finally building encfs.  Look for "encfs.exe" and "encfsctl.exe" in the encfs\Release folder after building is finished. 
+Encfs4win now comes with a fully-automated build tool called "build.bat", located in the root directory. This tool will automatically download, build and install Dokan, TinyXML2, Easylogging++ and OpenSSL, before finally building encfs.  Look for "encfs.exe" and "encfsctl.exe" in the encfs\Release folder after building is finished. 
 
 The automated tool will also check to see if any of these prerequisites are already installed (by looking for the DOKAN_ROOT and OPENSSL_ROOT environment variables).  If found, it will use the installed version and skip over that prerequisite.  
 
@@ -40,7 +41,7 @@ The automated tool will also check to see if any of these prerequisites are alre
 
 You can also choose to handle some or all of the prerequisites yourself.  After the above dependencies have been installed and built, simply open the encfs4win solution (encfs/encfs.sln) and build the solution.  Note that you must have the environment variables DOKAN_ROOT and OPENSSL_ROOT pointing to your Dokan and OpenSSL installations, respectively (otherwise you will need to modify the solution to point to your installations).  
 
-This will result in encfs.exe, encfsctl.exe and the rlog binaries being built and placed in the encfs\Release directory. 
+This will result in encfs.exe and encfsctl.exe binaries being built and placed in the encfs\Release directory. 
 
 ## Environment
 

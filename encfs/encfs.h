@@ -29,12 +29,14 @@
 #endif
 
 #include "fuse.h"
-#include "rlog/rlog.h"
+#include "easylogging++.h"
 #include <sys/types.h>
 #include "unistd.h"
 #include "pthread.h"
 
 #include "config.h"
+
+namespace encfs {
 
 #if defined(HAVE_SYS_XATTR_H) | defined(HAVE_ATTR_XATTR_H)
 #define HAVE_XATTR
@@ -45,25 +47,23 @@
 
 #if 0
 static __inline int setfsuid(uid_t uid) {
-	uid_t olduid = geteuid();
+  uid_t olduid = geteuid();
 
-	if (seteuid(uid) != 0) {
-		// ignore error.
-		rDebug("seteuid error: %i", errno);
-	}
+  if (seteuid(uid) != 0) {
+    VLOG(1) << "seteuid error: " << errno;
+  }
 
-	return olduid;
+  return olduid;
 }
 
 static __inline int setfsgid(gid_t gid) {
-	gid_t oldgid = getegid();
+  gid_t oldgid = getegid();
 
-	if (setegid(gid) != 0) {
-		// ignore error.
-		rDebug("setfsgid error: %i", errno);
-	}
+  if (setegid(gid) != 0) {
+    VLOG(1) << "setfsgid error: " << errno;
+  }
 
-	return oldgid;
+  return oldgid;
 }
 #endif
 #endif
@@ -118,4 +118,6 @@ int encfs_utimens(const char *path, const struct timespec ts[2]);
 #ifdef WIN32
 void win_encfs_oper_init(fuse_operations &encfs_oper);
 #endif
+
+}  // namespace encfs
 #endif
