@@ -122,7 +122,7 @@ int RawFileIO::open(int flags) {
       result = fd = newFd;
     } else {
       result = -errno;
-      RLOG(INFO) << "::open error: " << strerror(errno);
+      RLOG(DEBUG) << "::open error: " << strerror(errno);
     }
   }
 
@@ -134,7 +134,7 @@ int RawFileIO::getAttr(struct stat_st *stbuf) const {
   int eno = errno;
 
   if (res < 0) {
-    RLOG(INFO) << "getAttr error on " << name << ": " << strerror(eno);
+    RLOG(DEBUG) << "getAttr error on " << name << ": " << strerror(eno);
   }
 
   return (res < 0) ? -eno : 0;
@@ -169,8 +169,8 @@ ssize_t RawFileIO::read(const IORequest &req) const {
   ssize_t readSize = unix::pread(fd, req.data, req.dataLen, req.offset);
 
   if (readSize < 0) {
-    RLOG(INFO) << "read failed at offset " << req.offset << " for "
-               << req.dataLen << " bytes: " << strerror(errno);
+    RLOG(WARNING) << "read failed at offset " << req.offset << " for "
+                  << req.dataLen << " bytes: " << strerror(errno);
   }
 
   return readSize;
@@ -190,8 +190,8 @@ bool RawFileIO::write(const IORequest &req) {
 
     if (writeSize < 0) {
       knownSize = false;
-      RLOG(INFO) << "write failed at offset " << offset << " for " << bytes
-                 << " bytes: " << strerror(errno);
+      RLOG(WARNING) << "write failed at offset " << offset << " for " << bytes
+                    << " bytes: " << strerror(errno);
       return false;
     }
 
@@ -230,8 +230,8 @@ int RawFileIO::truncate(off_t size) {
 
   if (res < 0) {
     int eno = errno;
-    RLOG(INFO) << "truncate failed for " << name << " (" << fd << ") size "
-               << size << ", error " << strerror(eno);
+    RLOG(WARNING) << "truncate failed for " << name << " (" << fd << ") size "
+                  << size << ", error " << strerror(eno);
     res = -eno;
     knownSize = false;
   } else {

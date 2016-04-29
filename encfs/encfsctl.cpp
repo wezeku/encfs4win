@@ -184,8 +184,8 @@ static int showInfo(int argc, char **argv) {
   string rootDir = argv[1];
   if (!checkDir(rootDir)) return EXIT_FAILURE;
 
-  EncFSConfig *config = new EncFSConfig;
-  ConfigType type = readConfig(rootDir, config);
+  std::shared_ptr<EncFSConfig> config(new EncFSConfig);
+  ConfigType type = readConfig(rootDir, config.get());
 
   // show information stored in config..
   switch (type) {
@@ -229,8 +229,7 @@ static int showInfo(int argc, char **argv) {
       break;
   }
 
-  showFSInfo(config);
-  delete config;
+  showFSInfo(config.get());
 
   return EXIT_SUCCESS;
 }
@@ -739,7 +738,13 @@ static int ckpasswdAutomaticly(int argc, char **argv) {
   return do_chpasswd(true, false, true, argc, argv);
 }
 
+namespace encfs {
+	void init_mpool_mutex();
+}
+
 int main(int argc, char **argv) {
+  encfs::init_mpool_mutex();
+  
   START_EASYLOGGINGPP(argc, argv);
   encfs::initLogging();
 

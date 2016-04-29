@@ -141,8 +141,9 @@ static int withFileNode(const char *opName, const char *path,
     }
 
     res = op(fnode.get());
-
-    LOG_IF(res < 0, INFO) << "op: " << opName << " error: " << strerror(-res);
+    if (res < 0) {
+      RLOG(DEBUG) << "op: " << opName << " error: " << strerror(-res);
+    }
   } catch (encfs::Error &err) {
     RLOG(ERROR) << "withFileNode: error caught in " << opName << ": "
                 << err.what();
@@ -572,6 +573,15 @@ int encfs_open(const char *path, struct fuse_file_info *file) {
   }
 
   return res;
+}
+
+int encfs_create(const char *path, mode_t mode, struct fuse_file_info *file) {
+  int res = encfs_mknod(path, mode, 0);
+  if (res) {
+    return res;
+  }
+
+  return encfs_open(path, file);
 }
 
 int _do_flush(FileNode *fnode) {
