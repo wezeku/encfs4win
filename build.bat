@@ -76,15 +76,14 @@ if "%ENCFS_MAJOR_VERSION%"=="2" (
 )
 
 
+REM tinyxml2
+call build-tinyxml2.bat
+if NOT %ERRORLEVEL% == 0 goto :no_tinyxml2
+
+
 REM dokany
 call build-dokany.bat
 if NOT %ERRORLEVEL% == 0 goto :no_dokany
-
-
-REM boost library
-call build-boost.bat
-if NOT %ERRORLEVEL% == 0 goto :no_boost
-if "%BOOST_ROOT%"=="" goto :no_boost
 
 
 REM (Clean,)? Build encfs 
@@ -205,11 +204,11 @@ goto :end
 
 
 
-:no_dokany
+:no_tinyxml2
 
 echo.
 echo ==================================================
-echo    Dokany could not be built, and is required!
+echo   tinyxml2 could not be built, and is required!
 echo ==================================================
 echo.
 exit /b 1
@@ -218,11 +217,11 @@ goto :end
 
 
 
-:no_boost
+:no_dokany
 
 echo.
 echo ==================================================
-echo  BOOST_ROOT not found - Boost libraries required! 
+echo    Dokany could not be built, and is required!
 echo ==================================================
 echo.
 exit /b 1

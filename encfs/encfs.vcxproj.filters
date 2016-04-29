@@ -111,6 +111,9 @@
     <ClCompile Include="vasprintf.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="XmlReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="autosprintf.h">
@@ -231,6 +234,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sys\time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

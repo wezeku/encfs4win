@@ -31,7 +31,6 @@ RUN     apt-get -y upgrade \
         && apt-get -y install \
             git \
             libfuse-dev \
-            libboost-serialization-dev \
             libssl-dev \
             librlog-dev \
             gettext \

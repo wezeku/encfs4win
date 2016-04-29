@@ -17,7 +17,7 @@
 #include <fuse.h>
 #include <winioctl.h>
 #include <direct.h>
-#include <boost/scoped_array.hpp>
+#include <vector>
 #include "rlog/rlog.h"
 
 time_t filetimeToUnixTime(const FILETIME *ft);
@@ -688,19 +688,19 @@ utf8_to_wfn(const std::string& src)
 	rDebug("NOTIFY -- utf8_to_wfn");
 	int len = src.length()+1;
 	const size_t addSpace = 6;
-	boost::scoped_array<wchar_t> buf(new wchar_t[len+addSpace]);
-	utf8_to_wchar_buf(src.c_str(), buf.get()+addSpace, len);
-	for (wchar_t *p = buf.get()+addSpace; *p; ++p)
+	std::vector<wchar_t> buf(len + addSpace);
+	utf8_to_wchar_buf(src.c_str(), buf.data()+addSpace, len);
+	for (wchar_t *p = buf.data()+addSpace; *p; ++p)
 		if (*p == L'/')
 			*p = L'\\';
 	char drive = tolower(buf[addSpace]);
 	if (drive >= 'a' && drive <= 'z' && buf[addSpace+1] == ':') {
-		memcpy(buf.get()+(addSpace-4), L"\\\\?\\", 4*sizeof(wchar_t));
-		return buf.get()+(addSpace-4);
+		memcpy(buf.data()+(addSpace-4), L"\\\\?\\", 4*sizeof(wchar_t));
+		return buf.data()+(addSpace-4);
 	} else if (buf[addSpace] == L'\\' && buf[addSpace+1] == L'\\') {
-		memcpy(buf.get()+(addSpace-6), L"\\\\?\\UNC", 7*sizeof(wchar_t));
-		return buf.get()+(addSpace-6);
+		memcpy(buf.data()+(addSpace-6), L"\\\\?\\UNC", 7*sizeof(wchar_t));
+		return buf.data()+(addSpace-6);
 	}
-	return buf.get()+addSpace;
+	return buf.data()+addSpace;
 }
 

@@ -78,6 +78,7 @@ static int showInfo(int argc, char **argv);
 static int showVersion(int argc, char **argv);
 static int chpasswd(int argc, char **argv);
 static int chpasswdAutomaticly(int argc, char **argv);
+static int ckpasswdAutomaticly(int argc, char **argv);
 static int cmd_ls(int argc, char **argv);
 static int cmd_decode(int argc, char **argv);
 static int cmd_encode(int argc, char **argv);
@@ -107,6 +108,11 @@ struct CommandOpts {
        // xgroup(usage)
        gettext_noop(
            "  -- change password for volume, taking password"
+           " from standard input.\n\tNo prompts are issued.")},
+      {"autocheckpasswd", 1, 1, ckpasswdAutomaticly, "(root dir)",
+       // xgroup(usage)
+       gettext_noop(
+           "  -- check password for volume, taking password"
            " from standard input.\n\tNo prompts are issued.")},
       {"ls", 1, 2, cmd_ls, 0, 0},
       {"showcruft", 1, 1, cmd_showcruft, "(root dir)",
@@ -180,7 +186,7 @@ static int showInfo(int argc, char **argv) {
   string rootDir = argv[1];
   if (!checkDir(rootDir)) return EXIT_FAILURE;
 
-  shared_ptr<EncFSConfig> config(new EncFSConfig);
+  EncFSConfig* config = new EncFSConfig;
   ConfigType type = readConfig(rootDir, config);
 
   // show information stored in config..
@@ -631,12 +637,12 @@ static int cmd_showcruft(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
-static int do_chpasswd(bool useStdin, bool annotate, int argc, char **argv) {
+static int do_chpasswd(bool useStdin, bool annotate, bool checkOnly, int argc, char **argv) {
   (void)argc;
   string rootDir = argv[1];
   if (!checkDir(rootDir)) return EXIT_FAILURE;
 
-  shared_ptr<EncFSConfig> config(new EncFSConfig);
+  EncFSConfig* config = new EncFSConfig;
   ConfigType cfgType = readConfig(rootDir, config);
 
   if (cfgType == Config_None) {
@@ -665,6 +671,12 @@ static int do_chpasswd(bool useStdin, bool annotate, int argc, char **argv) {
   if (!volumeKey) {
     cout << _("Invalid password\n");
     return EXIT_FAILURE;
+  }
+
+  if(checkOnly)
+  {
+    cout << _("Password is correct\n");
+    return EXIT_SUCCESS;
   }
 
   // Now, get New user key..
@@ -709,11 +721,15 @@ static int do_chpasswd(bool useStdin, bool annotate, int argc, char **argv) {
 }
 
 static int chpasswd(int argc, char **argv) {
-  return do_chpasswd(false, false, argc, argv);
+  return do_chpasswd(false, false, false, argc, argv);
 }
 
 static int chpasswdAutomaticly(int argc, char **argv) {
-  return do_chpasswd(true, false, argc, argv);
+  return do_chpasswd(true, false, false, argc, argv);
+}
+
+static int ckpasswdAutomaticly(int argc, char **argv) {
+  return do_chpasswd(true, false, true, argc, argv);
 }
 
 void init_mpool_mutex();
