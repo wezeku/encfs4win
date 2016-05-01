@@ -32,6 +32,7 @@
 #include "sys/time.h"
 #include <time.h>
 #include "unistd.h"
+#include <signal.h>
 
 #include "Context.h"
 #include "Error.h"
@@ -59,6 +60,9 @@ using namespace encfs;
 using gnu::autosprintf;
 
 INITIALIZE_EASYLOGGINGPP
+
+// Allow handlers to access mount context 
+std::shared_ptr<EncFS_Context> saved_ctx = NULL;
 
 namespace encfs {
 
@@ -182,8 +186,7 @@ static string slashTerminate(const string &src) {
   return result;
 }
 
-static
-char *unslashTerminate(char *src)
+static char *unslashTerminate(char *src)
 {
 	size_t l = strlen(src);
 	if (l > 1 && (src[l - 1] == '\\' || src[l - 1] == '/'))
@@ -531,15 +534,28 @@ void *encfs_init(fuse_conn_info *conn) {
 
 void encfs_destroy(void *_ctx) {}
 
-namespace encfs {
-  void init_mpool_mutex();
-}
+#if defined(WIN32)
+  namespace encfs {
+    void init_mpool_mutex();
+  }
+
+  // Predef signal handler 
+  BOOL WINAPI signal_callback_handler(DWORD dwType);
+#endif 
 
 int main(int argc, char *argv[]) {
+  encfs::initLogging();
+
+#if defined(WIN32)
   SetConsoleCP(65001); // set utf-8
   encfs::init_mpool_mutex();
 
-  encfs::initLogging();
+  // Register signal handler
+  if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)signal_callback_handler, TRUE)) {
+    RLOG(ERROR) << "Unable to install callback handler";
+    return EXIT_FAILURE;
+  }
+#endif
 
 #if defined(ENABLE_NLS) && defined(LOCALEDIR)
   setlocale(LC_ALL, "");
@@ -622,6 +638,7 @@ int main(int argc, char *argv[]) {
   // context is not a smart pointer because it will live for the life of
   // the filesystem.
   auto ctx = std::shared_ptr<EncFS_Context>(new EncFS_Context);
+  saved_ctx = ctx;
   ctx->publicFilesystem = encfsArgs->opts->ownerCreate;
   RootPtr rootInfo = initFS(ctx.get(), encfsArgs->opts);
 
@@ -795,4 +812,29 @@ static bool unmountFS(EncFS_Context *ctx) {
     fuse_unmount(arg->opts->mountPoint.c_str(), NULL);
     return true;
   }
+}
+
+// This function will be called when ctrl-c (SIGINT) signal is sent 
+BOOL WINAPI signal_callback_handler(DWORD dwType)
+{
+  if (saved_ctx == NULL) return FALSE;
+
+  switch (dwType) {
+  case CTRL_C_EVENT:
+  case CTRL_CLOSE_EVENT:
+  case CTRL_LOGOFF_EVENT:
+  case CTRL_SHUTDOWN_EVENT:
+
+    // cleanly unmount FS 
+    VLOG(1) << "Unmounting filesystem (ConsoleHandler)";
+    if (unmountFS(saved_ctx.get())) {
+      return TRUE;
+    }
+
+	break;
+  default:
+	  break;
+  }
+
+  return FALSE;
 }
