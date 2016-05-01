@@ -1,21 +1,15 @@
-#ifndef IDC_STATIC
-#define IDC_STATIC (-1)
-#endif
+//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ generated include file.
+// Used by resource.rc
+//
 
-#define IDR_MANIFEST                            1
-#define IDD_ABOUTBOX                            103
-#define IDD_MAIN                                104
-#define IDC_MYICON                              105
-#define IDI_MAIN                                108
-#define IDD_DRIVE                               110
-#define IDD_OPTIONS                             111
-#define IDD_PASSWORD                            113
-#define IDD_PREFERENCES                         115
-#define IDC_CHKPARANOIA                         1001
-#define IDC_DIR                                 1004
-#define IDC_CMBDRIVE                            1005
-#define IDC_PWD1                                1009
-#define IDC_PWD2                                1010
-#define IDC_CHKSTARTUP                          1011
-#define IDC_PASSWORD                            1011
-#define IDC_CHKOPEN                             1012
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NEXT_RESOURCE_VALUE        102
+#define _APS_NEXT_COMMAND_VALUE         40001
+#define _APS_NEXT_CONTROL_VALUE         1000
+#define _APS_NEXT_SYMED_VALUE           101
+#endif
+#endif

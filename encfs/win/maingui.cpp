@@ -163,8 +163,7 @@ InitInstance(HINSTANCE hInstance, int /* nCmdShow */)
 
   // load the icon
   niData.hIcon =
-    (HICON)LoadImage(hInstance, MAKEINTRESOURCE(IDI_MAIN), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON),
-      GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
+    (HICON)LoadImage(hInstance, L"dialog-password.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
 
   // the window to send messages to and the message to send
   //              note:   the message value should be in the

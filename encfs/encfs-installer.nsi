@@ -3,7 +3,7 @@
  
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "encfs"
-!define PRODUCT_VERSION "1.10.1-RC3"
+!define PRODUCT_VERSION "1.10.1-RC4"
 !define PRODUCT_PUBLISHER "CEMi4"
  
 SetCompressor lzma
@@ -69,8 +69,10 @@ Section "encfs" SEC04
   SectionIn RO
   
   # Install files
+  FIle "win\dialog-password.ico"
   File "Release\encfs.exe"
   File "Release\encfsctl.exe"
+  File "Release\encfsw.exe"
   File "$%OPENSSL_ROOT%\bin\libeay32.dll"
   File "$%OPENSSL_ROOT%\bin\ssleay32.dll"
   

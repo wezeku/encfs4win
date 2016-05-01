@@ -109,7 +109,9 @@
     <ResourceCompile Include="win\resource.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="win\dialog-password.ico" />
+    <Image Include="win\dialog-password.ico">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

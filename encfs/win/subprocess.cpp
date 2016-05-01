@@ -23,12 +23,12 @@ BOOL WINAPI CreateSubProcess(LPTSTR cmdline, SubProcessInformations* info)
   info->errorPart = NULL;
 
   // Create a pipe for the child process's STDOUT. 
-  if (!CreatePipe(&info->hOut, &hOutWr, &saAttr, 0))
-    ErrorExit(TEXT("StdoutRd CreatePipe"));
+  //if (!CreatePipe(&info->hOut, &hOutWr, &saAttr, 0))
+  //  ErrorExit(TEXT("StdoutRd CreatePipe"));
 
   // Ensure the read handle to the pipe for STDOUT is not inherited.
-  if (!SetHandleInformation(info->hOut, HANDLE_FLAG_INHERIT, 0))
-    ErrorExit(TEXT("Stdout SetHandleInformation"));
+  //if (!SetHandleInformation(info->hOut, HANDLE_FLAG_INHERIT, 0))
+  //  ErrorExit(TEXT("Stdout SetHandleInformation"));
 
   // Create a pipe for the child process's STDIN. 
   if (!CreatePipe(&hInRd, &info->hIn, &saAttr, 0))
@@ -42,10 +42,10 @@ BOOL WINAPI CreateSubProcess(LPTSTR cmdline, SubProcessInformations* info)
   // Create a duplicate of the output write handle for the std error
   // write handle. This is necessary in case the child application
   // closes one of its std output handles.
-  if (!DuplicateHandle(GetCurrentProcess(), hOutWr,
-    GetCurrentProcess(), &hErrWr, 0,
-    TRUE, DUPLICATE_SAME_ACCESS))
-    ErrorExit(TEXT("Stderr DuplicateHandle"));
+  //if (!DuplicateHandle(GetCurrentProcess(), hOutWr,
+  //  GetCurrentProcess(), &hErrWr, 0,
+  //  TRUE, DUPLICATE_SAME_ACCESS))
+  //  ErrorExit(TEXT("Stderr DuplicateHandle"));
 
 
   // Create the child process. On fail info->errorPart is set
