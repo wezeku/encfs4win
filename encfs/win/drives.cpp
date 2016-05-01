@@ -42,7 +42,7 @@ void Drive::Mount(HWND hwnd)
 	}
 
 	// check directory existence
-	if (!isDirectory(wchar_to_utf8_cstr(dir.c_str()).c_str())) {
+	if (!encfs::isDirectory(wchar_to_utf8_cstr(dir.c_str()).c_str())) {
 		if (YesNo(hwnd, _T("Directory does not exists. Remove from list?")))
 			Drives::Delete(shared_from_this());
 		return;
@@ -64,7 +64,7 @@ void Drive::Mount(HWND hwnd)
 	// mount using a sort of popen
 	TCHAR cmd[2048];
 	_sntprintf(cmd, LENGTH(cmd), _T("\"%s\" -S \"%s\" %c:"), executable, dir.c_str(), mnt[0]);
-	boost::shared_ptr<SubProcessInformations> proc(new SubProcessInformations);
+  std::shared_ptr<SubProcessInformations> proc(new SubProcessInformations);
 	proc->creationFlags = CREATE_NEW_PROCESS_GROUP|CREATE_NO_WINDOW;
 	if (!CreateSubProcess(cmd, proc.get())) {
 		DWORD err = GetLastError();
@@ -212,9 +212,9 @@ static HANDLE GetOldSubProject(DWORD pid)
 	return NULL;
 }
 
-boost::shared_ptr<Drive> Drive::Load(const std::string& name)
+std::shared_ptr<Drive> Drive::Load(const std::string& name)
 {
-	boost::shared_ptr<Drive> ret;
+  std::shared_ptr<Drive> ret;
 	std::tstring dir, drive, pid;
 	try {
 		dir = Config::Load(name, _T("Directory"));
@@ -254,7 +254,7 @@ bool Drives::autoShow = true;
 Drives::drive_t Drives::GetDrive(int n)
 {
 	if (n < 0 || (unsigned) n >= drives.size())
-		return boost::shared_ptr<Drive>();
+		return std::shared_ptr<Drive>();
 	return drives[n];
 }
 

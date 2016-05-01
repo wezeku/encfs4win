@@ -1,6 +1,5 @@
 #include <string>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 #include "config.hpp"
 #include "subprocess.h"
 
@@ -27,7 +26,7 @@ enum {
 
 class Drives;
 
-class Drive: public boost::enable_shared_from_this<Drive>
+class Drive: public std::enable_shared_from_this<Drive>
 {
 friend class Drives;
 public:
@@ -41,10 +40,10 @@ private:
 	std::tstring dir;
 	TCHAR mnt[4];
 	bool mounted;
-	boost::shared_ptr<SubProcessInformations> subProcess;
+	std::shared_ptr<SubProcessInformations> subProcess;
 	Drive(const std::string& configName, const std::tstring& _dir, char drive, DWORD pid = 0);
 	void Save();
-	static boost::shared_ptr<Drive> Load(const std::string& name);
+	static std::shared_ptr<Drive> Load(const std::string& name);
 };
 
 class Drives
@@ -52,7 +51,7 @@ class Drives
 friend class Drive;
 public:
 	static bool autoShow;
-	typedef boost::shared_ptr<Drive> drive_t;
+	typedef std::shared_ptr<Drive> drive_t;
 	static drive_t GetDrive(int n);
 	static void Load();
 	static void AddMenus(HMENU menu);

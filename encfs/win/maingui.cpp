@@ -27,6 +27,8 @@ static INT_PTR CALLBACK PreferencesDlgProc(HWND hWnd, UINT message, WPARAM wPara
 #define TRAYICONID	1
 #define SWM_TRAYMSG	WM_APP+100
 
+using namespace encfs;
+
 static void SetPath()
 {
 	TCHAR path[MAX_PATH];
@@ -46,14 +48,16 @@ static bool CheckDokan()
 	bool res = true;
 
 	HMODULE dll = LoadLibraryA("dokan.dll");
-	if (!dll)
-		return false;
+  if (!dll) {
+    dll = LoadLibraryA("dokan1.dll");
+    if (!dll) return false;
+  }
 
 	// check version
 	typedef ULONG (__stdcall *DokanVersionType)();
 	DokanVersionType ResolvedDokanVersion;
 	ResolvedDokanVersion=(DokanVersionType)GetProcAddress(dll,"DokanVersion");
-	if (!ResolvedDokanVersion || ResolvedDokanVersion() < DOKAN_VERSION)
+	if (!ResolvedDokanVersion)
 		res = false;
 
 	if (!GetProcAddress(dll,"DokanMain") || !GetProcAddress(dll,"DokanUnmount"))
@@ -137,7 +141,7 @@ static BOOL
 InitInstance(HINSTANCE hInstance, int /* nCmdShow */)
 {
 	// prepare for XP style controls
-	InitCommonControls();
+  //InitCommonControlsEx();
 
 	HWND hWnd = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_MAIN), NULL, (DLGPROC) MainDlgProc);
 	if (!hWnd)
@@ -230,7 +234,7 @@ static void createConfig(const std::string& rootDir, bool paranoid, const char* 
 	int keySize = 0;
 	int blockSize = 0;
 	Cipher::CipherAlgorithm alg;
-	rel::Interface nameIOIface;
+	Interface nameIOIface;
 	int blockMACBytes = 0;
 	int blockMACRandBytes = 0;
 	bool uniqueIV = false;
@@ -283,7 +287,7 @@ static void createConfig(const std::string& rootDir, bool paranoid, const char* 
 		}
 	}
 
-	shared_ptr<Cipher> cipher = Cipher::New( alg.name, keySize );
+	std::shared_ptr<Cipher> cipher = Cipher::New( alg.name, keySize );
 	if(!cipher)
 	{
 		TCHAR buf[256];
@@ -292,10 +296,10 @@ static void createConfig(const std::string& rootDir, bool paranoid, const char* 
 		throw truntime_error(buf);
 	}
     
-	shared_ptr<EncFSConfig> config( new EncFSConfig );
+	std::shared_ptr<EncFSConfig> config( new EncFSConfig );
 
 	config->cfgType = Config_V6;
-	config->cipherIface = cipher->Interface();
+	config->cipherIface = cipher->getInterface();
 	config->keySize = keySize;
 	config->blockSize = blockSize;
 	config->nameIface = nameIOIface;
@@ -331,7 +335,7 @@ static void createConfig(const std::string& rootDir, bool paranoid, const char* 
 		throw truntime_error(_T("Failure generating new volume key! ")
 		                         _T("Please report this error."));
 
-	if (!saveConfig( Config_V6, rootDir, config ))
+	if (!saveConfig( Config_V6, rootDir, config.get() ))
 		throw truntime_error(_T("Error saving configuration file"));
 }
 
@@ -421,8 +425,8 @@ OpenOrCreate(HWND hwnd)
 		return;
 
 	// if directory is already configured add and try to mount
-	boost::shared_ptr<EncFSConfig> config(new EncFSConfig);
-	if (readConfig(slashTerminate(wchar_to_utf8_cstr(dir.c_str())), config) != Config_None) {
+	std::shared_ptr<EncFSConfig> config(new EncFSConfig);
+	if (readConfig(slashTerminate(wchar_to_utf8_cstr(dir.c_str())), config.get()) != Config_None) {
 		char drive = SelectFreeDrive(hwnd);
 		if (drive) {
 			Drives::drive_t dr(Drives::Add(dir, drive));
@@ -579,7 +583,7 @@ MainDlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		default:
 			if (id >= IDM_MOUNT_START && id < IDM_MOUNT_END) {
-				boost::shared_ptr<Drive> drive = Drives::GetDrive(IDM_MOUNT_N(id));
+				std::shared_ptr<Drive> drive = Drives::GetDrive(IDM_MOUNT_N(id));
 				if (!drive)
 					return 1;
 
