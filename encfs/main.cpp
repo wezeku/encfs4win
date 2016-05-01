@@ -61,7 +61,7 @@ using gnu::autosprintf;
 
 INITIALIZE_EASYLOGGINGPP
 
-// Allow handlers to access mount context 
+// Allow signal handlers to access mount context 
 std::shared_ptr<EncFS_Context> saved_ctx = NULL;
 
 namespace encfs {
@@ -638,9 +638,11 @@ int main(int argc, char *argv[]) {
   // context is not a smart pointer because it will live for the life of
   // the filesystem.
   auto ctx = std::shared_ptr<EncFS_Context>(new EncFS_Context);
-  saved_ctx = ctx;
   ctx->publicFilesystem = encfsArgs->opts->ownerCreate;
   RootPtr rootInfo = initFS(ctx.get(), encfsArgs->opts);
+
+  // Remember our context for (Windows) signal handling 
+  saved_ctx = ctx;
 
   int returnCode = EXIT_FAILURE;
 
@@ -767,6 +769,9 @@ static void *idleMonitor(void *_arg) {
     if (idleCycles >= timeoutCycles) {
       int openCount = ctx->openFileCount();
       if (openCount == 0) {
+	    VLOG(1) << "Preparing to unmount due to inactivity: "
+		  << arg->opts->mountPoint;
+		
         if (unmountFS(ctx)) {
           // wait for main thread to wake us up
           pthread_cond_wait(&ctx->wakeupCond, &ctx->wakeupMutex);
@@ -800,41 +805,75 @@ static void *idleMonitor(void *_arg) {
 static bool unmountFS(EncFS_Context *ctx) {
   std::shared_ptr<EncFS_Args> arg = ctx->args;
   if (arg->opts->mountOnDemand) {
-    VLOG(1) << "Detaching filesystem due to inactivity: "
+    VLOG(1) << "Detaching filesystem: "
             << arg->opts->mountPoint;
 
     ctx->setRoot(std::shared_ptr<DirNode>());
     return false;
   } else {
     // Time to unmount!
-    RLOG(WARNING) << "Unmounting filesystem due to inactivity: "
+    RLOG(WARNING) << "Unmounting filesystem: "
                   << arg->opts->mountPoint;
     fuse_unmount(arg->opts->mountPoint.c_str(), NULL);
     return true;
   }
 }
 
+#ifdef WIN32
 // This function will be called when ctrl-c (SIGINT) signal is sent 
 BOOL WINAPI signal_callback_handler(DWORD dwType)
 {
-  if (saved_ctx == NULL) return FALSE;
+  // Ensure context has been defined
+  if (!saved_ctx) {
+    VLOG(1) << "ConsoleHandler: Nothing to do!";
+    ExitProcess(0);
+    return FALSE;
+  }
+  
+  // Unmount only if mounted 
+  if (saved_ctx->isMounted()) {
+    switch (dwType) {
+    case CTRL_C_EVENT:
+    case CTRL_BREAK_EVENT:
+    case CTRL_CLOSE_EVENT:
+    case CTRL_LOGOFF_EVENT:
+    case CTRL_SHUTDOWN_EVENT:
 
-  switch (dwType) {
-  case CTRL_C_EVENT:
-  case CTRL_CLOSE_EVENT:
-  case CTRL_LOGOFF_EVENT:
-  case CTRL_SHUTDOWN_EVENT:
+      pthread_mutex_lock(&saved_ctx->wakeupMutex);
 
-    // cleanly unmount FS 
-    VLOG(1) << "Unmounting filesystem (ConsoleHandler)";
-    if (unmountFS(saved_ctx.get())) {
-      return TRUE;
+      // cleanly unmount FS 
+      VLOG(1) << "ConsoleHandler: Unmounting filesystem";
+      if (unmountFS(saved_ctx.get())) {
+        // wait for main thread to wake us up
+        pthread_cond_wait(&saved_ctx->wakeupCond, &saved_ctx->wakeupMutex);
+      }
+
+      pthread_mutex_unlock(&saved_ctx->wakeupMutex);
+
+      break;
+    default:
+      RLOG(ERROR) << "ConsoleHandler: Unrecognized signal caught";
+      return FALSE;
     }
-
-	break;
-  default:
-	  break;
   }
 
-  return FALSE;
+
+  VLOG(1) << "ConsoleHandler: Perform cleanup";
+
+  int res = -EIO;
+  std::shared_ptr<DirNode> FSRoot = saved_ctx->getRoot(&res);
+  if (!FSRoot) {
+    RLOG(ERROR) << "ConsoleHandler: No FSRoot!";
+    return FALSE;
+  }
+
+  FSRoot.reset();
+  saved_ctx->setRoot(std::shared_ptr<DirNode>());
+
+  MemoryPool::destroyAll();
+  openssl_shutdown(saved_ctx->args->isThreaded);
+
+  ExitProcess(0);
+  return TRUE;
 }
+#endif
