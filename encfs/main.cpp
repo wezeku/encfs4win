@@ -596,7 +596,7 @@ int main(int argc, char *argv[]) {
   // Grab a command to unmount now, so we can exit right away 
   if (encfsArgs->opts->unmount) {
     VLOG(1) << "performing --unmount of " << encfsArgs->opts->mountPoint;
-    fuse_unmount(encfsArgs->opts->mountPoint.c_str(), NULL);
+    fuse_unmount(encfsArgs->opts->mountPoint.c_str());
     return 0;
   }
 
