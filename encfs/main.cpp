@@ -424,7 +424,7 @@ static bool processArgs(int argc, char *argv[],
   if (out->opts->unmount && optind + 1 <= argc) {
     // mountPoint is assumed to be slash terminated in the
     // rest of the code.
-    out->opts->mountPoint = unslashTerminate(argv[optind++]);
+    out->opts->mountPoint = slashTerminate(argv[optind++]);
   } else if (optind + 2 <= argc) {
     // both rootDir and mountPoint are assumed to be slash terminated in the
     // rest of the code.
