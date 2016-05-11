@@ -166,7 +166,7 @@ static int showInfo(int argc, char **argv) {
   if (!checkDir(rootDir)) return EXIT_FAILURE;
 
   std::shared_ptr<EncFSConfig> config(new EncFSConfig);
-  ConfigType type = readConfig(rootDir, config.get());
+  ConfigType type = readConfig(rootDir, config.get(), "");
 
   // show information stored in config..
   switch (type) {
@@ -221,7 +221,9 @@ static RootPtr initRootInfo(int &argc, char **&argv) {
   opts->createIfNotFound = false;
   opts->checkKey = false;
 
-  static struct option long_options[] = {{"extpass", 1, 0, 'p'}, {0, 0, 0, 0}};
+  static struct option long_options[] = {
+      { "extpass", 1, 0, 'p' }, 
+      {0, 0, 0, 0}};
 
   for (;;) {
     int option_index = 0;
@@ -617,14 +619,14 @@ static int cmd_showcruft(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
-static int do_chpasswd(bool useStdin, bool annotate, bool checkOnly, int argc,
+static int do_chpasswd(PasswordSource passSrc, bool annotate, bool checkOnly, int argc,
                        char **argv) {
   (void)argc;
   string rootDir = argv[1];
   if (!checkDir(rootDir)) return EXIT_FAILURE;
 
   EncFSConfig *config = new EncFSConfig;
-  ConfigType cfgType = readConfig(rootDir, config);
+  ConfigType cfgType = readConfig(rootDir, config, "");
 
   if (cfgType == Config_None) {
     cout << _("Unable to load or parse config file\n");
@@ -643,7 +645,7 @@ static int do_chpasswd(bool useStdin, bool annotate, bool checkOnly, int argc,
   // ask for existing password
   cout << _("Enter current Encfs password\n");
   if (annotate) cerr << "$PROMPT$ passwd" << endl;
-  CipherKey userKey = config->getUserKey(useStdin);
+  CipherKey userKey = config->getUserKey(passSrc, NULL, 0);
   if (!userKey) return EXIT_FAILURE;
 
   // decode volume key using user key -- at this point we detect an incorrect
@@ -666,9 +668,9 @@ static int do_chpasswd(bool useStdin, bool annotate, bool checkOnly, int argc,
   // reinitialize salt and iteration count
   config->kdfIterations = 0;  // generate new
 
-  if (useStdin) {
+  if (passSrc == Pass_Stdin) {
     if (annotate) cerr << "$PROMPT$ new_passwd" << endl;
-    userKey = config->getUserKey(true);
+    userKey = config->getUserKey(Pass_Stdin, NULL, 0);
   } else
     userKey = config->getNewUserKey();
 
@@ -685,7 +687,7 @@ static int do_chpasswd(bool useStdin, bool annotate, bool checkOnly, int argc,
     config->assignKeyData(keyBuf, encodedKeySize);
     delete[] keyBuf;
 
-    if (saveConfig(cfgType, rootDir, config)) {
+    if (saveConfig(cfgType, rootDir, config, "")) {
       // password modified -- changes volume key of filesystem..
       cout << _("Volume Key successfully updated.\n");
       result = EXIT_SUCCESS;
@@ -702,15 +704,15 @@ static int do_chpasswd(bool useStdin, bool annotate, bool checkOnly, int argc,
 }
 
 static int chpasswd(int argc, char **argv) {
-  return do_chpasswd(false, false, false, argc, argv);
+  return do_chpasswd(Pass_Prompt, false, false, argc, argv);
 }
 
 static int chpasswdAutomaticly(int argc, char **argv) {
-  return do_chpasswd(true, false, false, argc, argv);
+  return do_chpasswd(Pass_Stdin, false, false, argc, argv);
 }
 
 static int ckpasswdAutomaticly(int argc, char **argv) {
-  return do_chpasswd(true, false, true, argc, argv);
+  return do_chpasswd(Pass_Stdin, false, true, argc, argv);
 }
 
 int main(int argc, char **argv) {

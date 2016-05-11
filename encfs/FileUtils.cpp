@@ -68,9 +68,6 @@ using gnu::autosprintf;
 namespace encfs {
 
 static const int DefaultBlockSize = 1024;
-// The maximum length of text passwords.  If longer are needed,
-// use the extpass option, as extpass can return arbitrary length binary data.
-static const int MaxPassBuf = 512;
 
 static const int NormalKDFDuration = 500;     // 1/2 a second
 static const int ParanoiaKDFDuration = 3000;  // 3 seconds
@@ -231,9 +228,20 @@ ConfigType readConfig_load(ConfigInfo *nm, const char *path,
  * Try to locate the config file
  * Tries the most recent format first, then looks for older versions
  */
-ConfigType readConfig(const string &rootDir, EncFSConfig *config) {
+ConfigType readConfig(const string &rootDir, EncFSConfig *config, 
+                      const string &cmdConfig) {
   ConfigInfo *nm = ConfigFileMapping;
   while (nm->fileName) {
+    // allow command line argument to override default config path 
+    if (!cmdConfig.empty()) {
+      if (!fileExists(cmdConfig.c_str())) {
+        RLOG(ERROR)
+            << "fatal: config file specified on command line does not exist: "
+            << cmdConfig;
+        exit(1);
+      }
+      return readConfig_load(nm, cmdConfig.c_str(), config);
+    }
     // allow environment variable to override default config path
     if (nm->environmentOverride != NULL) {
       char *envFile = getenv(nm->environmentOverride);
@@ -441,14 +449,18 @@ bool readV4Config(const char *configFile, EncFSConfig *config,
 }
 
 bool saveConfig(ConfigType type, const string &rootDir,
-                const EncFSConfig *config) {
+                const EncFSConfig *config, const string &cmdConfig) {
   bool ok = false;
 
   ConfigInfo *nm = ConfigFileMapping;
   while (nm->fileName) {
     if (nm->type == type && nm->saveFunc) {
       string path = rootDir + nm->fileName;
-      if (nm->environmentOverride != NULL) {
+      if (!cmdConfig.empty()) {
+        // use command line argument if specified
+        path.assign(cmdConfig);
+      }
+      else if (nm->environmentOverride != NULL) {
         // use environment file if specified..
         const char *envFile = getenv(nm->environmentOverride);
         if (envFile != NULL) path.assign(envFile);
@@ -954,7 +966,6 @@ RootPtr createV6Config(EncFS_Context *ctx,
   bool enableIdleTracking = opts->idleTracking;
   bool forceDecode = opts->forceDecode;
   const std::string passwordProgram = opts->passwordProgram;
-  bool useStdin = opts->useStdin;
   bool reverseEncryption = opts->reverseEncryption;
   ConfigMode configMode = opts->configMode;
   bool annotate = opts->annotate;
@@ -1160,10 +1171,10 @@ RootPtr createV6Config(EncFS_Context *ctx,
 
   // get user key and use it to encode volume key
   CipherKey userKey;
-  VLOG(1) << "useStdin: " << useStdin;
-  if (useStdin) {
+  VLOG(1) << "passSrc: " << opts->passSrc;
+  if (opts->passSrc != Pass_Prompt) {
     if (annotate) cerr << "$PROMPT$ new_passwd" << endl;
-    userKey = config->getUserKey(useStdin);
+    userKey = config->getUserKey(opts);
   } else if (!passwordProgram.empty())
     userKey = config->getUserKey(passwordProgram, rootDir);
   else
@@ -1182,7 +1193,7 @@ RootPtr createV6Config(EncFS_Context *ctx,
     return rootInfo;
   }
 
-  if (!saveConfig(Config_V6, rootDir, config.get())) {
+  if (!saveConfig(Config_V6, rootDir, config.get(), opts->config)) {
     return rootInfo;
   }
 
@@ -1373,16 +1384,27 @@ CipherKey EncFSConfig::makeKey(const char *password, int passwdLen) {
   return userKey;
 }
 
-CipherKey EncFSConfig::getUserKey(bool useStdin) {
+CipherKey EncFSConfig::getUserKey(const std::shared_ptr<EncFS_Opts> &opts) {
+  return getUserKey(opts->passSrc, opts->pass, sizeof(opts->pass));
+}
+CipherKey EncFSConfig::getUserKey(const PasswordSource passSrc, char *pass, const int passBuffLen) {
   char passBuf[MaxPassBuf];
-  char *res;
+  char *res = NULL;
 
-  if (useStdin) {
+  if (passSrc == Pass_Cmd && pass != NULL) {
+    if (strlen(pass) > 0) {
+      res = strncpy(passBuf, pass, sizeof(passBuf));
+      passBuf[sizeof(passBuf) - 1] = '\0'; // force null-termination 
+      memset(pass, 0, passBuffLen);
+    }
+  }
+  else if (passSrc == Pass_Stdin) {
     res = fgets(passBuf, sizeof(passBuf), stdin);
     // Kill the trailing newline.
     if (passBuf[strlen(passBuf) - 1] == '\n')
       passBuf[strlen(passBuf) - 1] = '\0';
-  } else {
+  }
+  else {
     // xgroup(common)
     res = readpassphrase(_("EncFS Password: "), passBuf, sizeof(passBuf),
                          RPP_ECHO_OFF);
@@ -1529,7 +1551,7 @@ RootPtr initFS(EncFS_Context *ctx, const std::shared_ptr<EncFS_Opts> &opts) {
   RootPtr rootInfo;
   std::shared_ptr<EncFSConfig> config(new EncFSConfig);
 
-  if (readConfig(opts->rootDir, config.get()) != Config_None) {
+  if (readConfig(opts->rootDir, config.get(), opts->config) != Config_None) {
     if (config->blockMACBytes == 0 && opts->requireMac) {
       cout << _(
           "The configuration disabled MAC, but you passed --require-macs\n");
@@ -1567,10 +1589,10 @@ RootPtr initFS(EncFS_Context *ctx, const std::shared_ptr<EncFS_Opts> &opts) {
     // get user key
     CipherKey userKey;
 
-    if (opts->passwordProgram.empty()) {
-      VLOG(1) << "useStdin: " << opts->useStdin;
+    if (opts->passSrc != Pass_Ext) {
+      VLOG(1) << "passSrc: " << opts->passSrc;
       if (opts->annotate) cerr << "$PROMPT$ passwd" << endl;
-      userKey = config->getUserKey(opts->useStdin);
+      userKey = config->getUserKey(opts);
     } else
       userKey = config->getUserKey(opts->passwordProgram, opts->rootDir);
 
