@@ -1172,10 +1172,10 @@ RootPtr createV6Config(EncFS_Context *ctx,
   // get user key and use it to encode volume key
   CipherKey userKey;
   VLOG(1) << "passSrc: " << opts->passSrc;
-  if (opts->passSrc != Pass_Prompt) {
+  if (opts->passSrc == Pass_Cmd || opts->passSrc == Pass_Stdin) {
     if (annotate) cerr << "$PROMPT$ new_passwd" << endl;
     userKey = config->getUserKey(opts);
-  } else if (!passwordProgram.empty())
+  } else if (opts->passSrc == Pass_Ext)
     userKey = config->getUserKey(passwordProgram, rootDir);
   else
     userKey = config->getNewUserKey();
