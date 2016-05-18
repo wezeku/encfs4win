@@ -200,7 +200,7 @@ int encfs_fgetattr(const char *path, struct stat_st *stbuf,
 }
 
 int encfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-                  off_t offset, struct fuse_file_info *finfo) {
+                  long long offset, struct fuse_file_info *finfo) {
   EncFS_Context *ctx = context();
 
   int res = ESUCCESS;
@@ -219,7 +219,7 @@ int encfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
       std::string name = dt.nextPlaintextName(&fileType, &inode);
       while (!name.empty()) {
-        struct stat st;
+        struct stat_st st;
         st.st_ino = inode;
         st.st_mode = fileType << 12;
 
