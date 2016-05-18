@@ -123,24 +123,25 @@ static int withFileNode(const char *opName, const char *path,
   if (!FSRoot) return res;
 
   try {
-    std::shared_ptr<FileNode> fnode;
 
-    if (fi != NULL)
-      fnode = GET_FN(ctx, fi);
+    auto do_op = [&FSRoot, opName, &op](FileNode *fnode) {
+      rAssert(fnode != nullptr);
+      VLOG(1) << "op: " << opName << " : " << fnode->cipherName();
+
+      // check that we're not recursing into the mount point itself
+      if (FSRoot->touchesMountpoint(fnode->cipherName())) {
+        VLOG(1) << "op: " << opName << " error: Tried to touch mountpoint: '"
+                << fnode->cipherName() << "'";
+        return -EIO;
+      }
+      return op(fnode);
+    };
+
+    if (fi != nullptr)
+      res = do_op(reinterpret_cast<FileNode *>(fi->fh));
     else
-      fnode = FSRoot->lookupNode(path, opName);
+      res = do_op(FSRoot->lookupNode(path, opName).get());
 
-    rAssert(fnode.get() != NULL);
-    VLOG(1) << "op: " << opName << " : " << fnode->cipherName();
-
-    // check that we're not recursing into the mount point itself
-    if (FSRoot->touchesMountpoint(fnode->cipherName())) {
-      VLOG(1) << "op: " << opName << " error: Tried to touch mountpoint: '"
-              << fnode->cipherName() << "'";
-      return res;  // still -EIO
-    }
-
-    res = op(fnode.get());
     if (res < 0) {
       RLOG(DEBUG) << "op: " << opName << " error: " << strerror(-res);
     }
@@ -198,7 +199,8 @@ int encfs_fgetattr(const char *path, struct stat_st *stbuf,
   return withFileNode("fgetattr", path, fi, bind(_do_getattr, _1, stbuf));
 }
 
-int encfs_getdir(const char *path, fuse_dirh_t h, fuse_dirfil_t filler) {
+int encfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+                  off_t offset, struct fuse_file_info *finfo) {
   EncFS_Context *ctx = context();
 
   int res = ESUCCESS;
@@ -209,7 +211,7 @@ int encfs_getdir(const char *path, fuse_dirh_t h, fuse_dirfil_t filler) {
 
     DirTraverse dt = FSRoot->openDir(path);
 
-    VLOG(1) << "getdir on " << FSRoot->cipherPath(path);
+    VLOG(1) << "readdir on " << FSRoot->cipherPath(path);
 
     if (dt.valid()) {
       int fileType = 0;
@@ -217,19 +219,26 @@ int encfs_getdir(const char *path, fuse_dirh_t h, fuse_dirfil_t filler) {
 
       std::string name = dt.nextPlaintextName(&fileType, &inode);
       while (!name.empty()) {
-        res = filler(h, name.c_str(), fileType, inode);
+        struct stat st;
+        st.st_ino = inode;
+        st.st_mode = fileType << 12;
 
-        if (res != ESUCCESS) break;
+        // TODO: add offset support.
+#if defined(fuse_fill_dir_flags)
+        if (filler(buf, name.c_str(), &st, 0, 0)) break;
+#else
+        if (filler(buf, name.c_str(), &st, 0)) break;
+#endif
 
         name = dt.nextPlaintextName(&fileType, &inode);
       }
     } else {
-      VLOG(1) << "getdir request invalid, path: '" << path << "'";
+      VLOG(1) << "readdir request invalid, path: '" << path << "'";
     }
 
     return res;
   } catch (encfs::Error &err) {
-    RLOG(ERROR) << "Error caught in getdir";
+    RLOG(ERROR) << "Error caught in readdir";
     return -EIO;
   }
 }
@@ -501,6 +510,9 @@ int encfs_utime(const char *path, struct utimbuf *buf) {
 
 int _do_utimens(EncFS_Context *, const string &cyName,
                 const struct timespec ts[2]) {
+#ifdef HAVE_UTIMENSAT
+  int res = utimensat(AT_FDCWD, cyName.c_str(), ts, AT_SYMLINK_NOFOLLOW);
+#else
   struct timeval tv[2];
   tv[0].tv_sec = ts[0].tv_sec;
   tv[0].tv_usec = ts[0].tv_nsec / 1000;
@@ -508,6 +520,7 @@ int _do_utimens(EncFS_Context *, const string &cyName,
   tv[1].tv_usec = ts[1].tv_nsec / 1000;
 
   int res = unix::utimes(cyName.c_str(), tv);
+#endif
   return (res == -1) ? -errno : ESUCCESS;
 }
 
@@ -564,7 +577,8 @@ int encfs_open(const char *path, struct fuse_file_info *file) {
               << file->flags;
 
       if (res >= 0) {
-        file->fh = (uintptr_t)ctx->putNode(path, fnode);
+        file->fh =
+            reinterpret_cast<uintptr_t>(ctx->putNode(path, std::move(fnode)));
         res = ESUCCESS;
       }
     }
@@ -613,7 +627,7 @@ int encfs_release(const char *path, struct fuse_file_info *finfo) {
   EncFS_Context *ctx = context();
 
   try {
-    ctx->eraseNode(path, (void *)(uintptr_t)finfo->fh);
+    ctx->eraseNode(path, reinterpret_cast<FileNode *>(finfo->fh));
     return ESUCCESS;
   } catch (encfs::Error &err) {
     RLOG(ERROR) << "error caught in release: " << err.what();

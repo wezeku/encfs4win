@@ -159,8 +159,7 @@ static void usage(const char *name) {
             "    encfs ~/.crypt ~/crypt\n"
             "\n")
        // xgroup(usage)
-       << _("For more information, see the man page encfs(1)") << "\n"
-       << endl;
+       << _("For more information, see the man page encfs(1)") << "\n" << endl;
 }
 
 static void FuseUsage() {
@@ -590,7 +589,7 @@ int main(int argc, char *argv[]) {
 
   encfs_oper.getattr = encfs_getattr;
   encfs_oper.readlink = encfs_readlink;
-  encfs_oper.getdir = encfs_getdir;  // deprecated for readdir
+  encfs_oper.readdir = encfs_readdir;
   encfs_oper.mknod = encfs_mknod;
   encfs_oper.mkdir = encfs_mkdir;
   encfs_oper.unlink = encfs_unlink;
