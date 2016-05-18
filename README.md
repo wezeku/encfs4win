@@ -25,7 +25,7 @@ The installer contains everything needed to run encfs on Windows, including the 
 
 Encfs4win has a few dependencies: 
 
-* [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) - For building the project.
+* [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) - For building the project (including Visual C++ and Windows SDK 10).
 * [Dokan library](https://github.com/dokan-dev/dokany) - Handles FUSE portion of software.  You can use either legacy (e.g., v0.7.4) or latest (v1.0). 
 * [TinyXML2 library](https://github.com/leethomason/tinyxml2) - Reads and writes configuration files for encfs.
 * [Easylogging++](https://github.com/easylogging/easyloggingpp) - Provides logging functionality. 
