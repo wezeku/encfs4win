@@ -23,6 +23,7 @@ static INT_PTR CALLBACK MainDlgProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 static INT_PTR CALLBACK OptionsDlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 static INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 static INT_PTR CALLBACK PreferencesDlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+UINT nwm_TaskBarCreated = ::RegisterWindowMessage(_T("TaskbarCreated"));
 
 #define TRAYICONID	1
 #define SWM_TRAYMSG	WM_APP+100
@@ -136,17 +137,10 @@ extern "C" int main_gui(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */
   return (int)msg.wParam;
 }
 
-// Initialize the window and tray icon
-static BOOL
-InitInstance(HINSTANCE hInstance, int /* nCmdShow */)
+// Create the tray icon 
+static BOOL 
+CreateTrayIcon(HWND hWnd)
 {
-  // prepare for XP style controls
-  //InitCommonControlsEx();
-
-  HWND hWnd = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_MAIN), NULL, (DLGPROC)MainDlgProc);
-  if (!hWnd)
-    return FALSE;
-
   ZeroMemory(&niData, sizeof(NOTIFYICONDATA));
 
   ULONGLONG ullVersion = GetDllVersion(_T("shell32.dll"));
@@ -160,6 +154,8 @@ InitInstance(HINSTANCE hInstance, int /* nCmdShow */)
 
   // state which structure members are valid
   niData.uFlags = NIF_ICON | NIF_MESSAGE;
+
+  HINSTANCE hInstance = (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE);
 
   // load the icon
   niData.hIcon =
@@ -179,6 +175,20 @@ InitInstance(HINSTANCE hInstance, int /* nCmdShow */)
 
   // call ShowWindow here to make the dialog initially visible
   return TRUE;
+}
+
+// Initialize the window and tray icon
+static BOOL
+InitInstance(HINSTANCE hInstance, int /* nCmdShow */)
+{
+  // prepare for XP style controls
+  //InitCommonControlsEx();
+
+  HWND hWnd = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_MAIN), NULL, (DLGPROC)MainDlgProc);
+  if (!hWnd)
+    return FALSE;
+
+  return CreateTrayIcon(hWnd);
 }
 
 // Get dll version number
@@ -550,6 +560,11 @@ MainDlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   int id;
 
   try {
+
+    // Create or refresh the taskbar icon
+    if (message == nwm_TaskBarCreated) {
+      return CreateTrayIcon(hWnd);
+    }
 
     switch (message) {
     case WM_INITDIALOG:
