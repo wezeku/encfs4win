@@ -54,6 +54,7 @@
 #define LONG_OPT_ANNOTATE 513
 #define LONG_OPT_NOCACHE 514
 #define LONG_OPT_REQUIRE_MAC 515
+#define LONG_OPT_FORKED 516
 
 using namespace std;
 using namespace encfs;
@@ -79,6 +80,7 @@ const int MaxFuseArgs = 32;
  */
 struct EncFS_Args {
   bool isDaemon;    // true == spawn in background, log to syslog
+  bool isFork;      // true == treat as background daemon 
   bool isThreaded;  // true == threaded
   bool isVerbose;   // false == only enable warning/error messages
   int idleTimeout;  // 0 == idle time in minutes to trigger unmount
@@ -94,6 +96,7 @@ struct EncFS_Args {
   string toString() {
     ostringstream ss;
     ss << (isDaemon ? "(daemon) " : "(fg) ");
+    ss << (isFork ? "(fork) " : "(encfs) ");
     ss << (isThreaded ? "(threaded) " : "(UP) ");
     if (idleTimeout > 0) ss << "(timeout " << idleTimeout << ") ";
     if (opts->checkKey) ss << "(keyCheck) ";
@@ -197,6 +200,7 @@ static bool processArgs(int argc, char *argv[],
                         const std::shared_ptr<EncFS_Args> &out) {
   // set defaults
   out->isDaemon = true;
+  out->isFork = false;
   out->isThreaded = true;
   out->isVerbose = false;
   out->idleTimeout = 0;
@@ -245,6 +249,7 @@ static bool processArgs(int argc, char *argv[],
       {"standard", 0, 0, '1'},              // standard configuration
       {"paranoia", 0, 0, '2'},              // standard configuration
       {"require-macs", 0, 0, LONG_OPT_REQUIRE_MAC},  // require MACs
+      {"forked", 0, 0, LONG_OPT_FORKED},  // is process forked?  
       {0, 0, 0, 0}};
 
   while (1) {
@@ -281,6 +286,9 @@ static bool processArgs(int argc, char *argv[],
         break;
       case LONG_OPT_REQUIRE_MAC:
         out->opts->requireMac = true;
+        break;
+      case LONG_OPT_FORKED:
+        out->isFork = true;
         break;
       case 'f':
         out->isDaemon = false;
@@ -578,6 +586,74 @@ int main(int argc, char *argv[]) {
     el::Loggers::setVerboseLevel(1);
   }
 
+  // fork encfs if we want a daemon (only if not already forked) 
+  if (encfsArgs->isDaemon && !encfsArgs->isFork) {
+    VLOG(1) << "Forking encfs as child\n";
+
+    PROCESS_INFORMATION piProcInfo;
+    STARTUPINFO siStartInfo;
+    BOOL bSuccess = FALSE;
+
+    SECURITY_ATTRIBUTES saAttr;
+    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    saAttr.bInheritHandle = TRUE;
+    saAttr.lpSecurityDescriptor = NULL;
+
+    // Set up members of the PROCESS_INFORMATION structure. 
+    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+
+    // Set up members of the STARTUPINFO structure. 
+    // This structure specifies the STDIN and STDOUT handles for redirection.
+    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+    siStartInfo.cb = sizeof(STARTUPINFO);
+    siStartInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+    siStartInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+    siStartInfo.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+    // Copy over args 
+    std::string args = "encfs.exe --forked ";
+    char *cmd_raw = GetCommandLine();
+    char *arg_appends = strstr(cmd_raw, argv[0]);
+    if (arg_appends == NULL) {
+      // If an error occurs, exit the application. 
+      cerr << _("Internal error: Failed to process argv for fork\n");
+      cerr << "argv[0]: " << _(argv[0]) <<endl;
+      cerr << "GetCommandLine: " << _(GetCommandLine()) <<endl;
+      return EXIT_FAILURE;
+    }
+    arg_appends += strlen(argv[0]) + (arg_appends - cmd_raw) + 1; // skip argv[0]
+    args.append(arg_appends);
+
+    // Create the child process. 
+    LPSTR prog = _strdup(args.c_str());
+    bSuccess = CreateProcess(NULL,
+      prog,     // command line 
+      NULL,          // process security attributes 
+      NULL,          // primary thread security attributes 
+      TRUE,          // handles are inherited 
+      CREATE_NEW_PROCESS_GROUP,             // creation flags 
+      NULL,          // use parent's environment 
+      NULL,          // use parent's current directory 
+      &siStartInfo,  // STARTUPINFO pointer 
+      &piProcInfo);  // receives PROCESS_INFORMATION 
+    if (!bSuccess) {
+      // If an error occurs, exit the application. 
+      cerr << _("Internal error: CreateProcess has failed to fork encfs.exe\n");
+      return EXIT_FAILURE;
+    }
+
+    // Wait for mount 
+    for (unsigned n = 0; n < 5 * 10; ++n) {
+      WaitForSingleObject(piProcInfo.hProcess, 200);
+
+      if (GetDriveType(encfsArgs->opts->mountPoint.c_str()) != DRIVE_NO_ROOT_DIR)
+        break;
+    }
+
+    return EXIT_SUCCESS;
+  }
+
   VLOG(1) << "Root directory: " << encfsArgs->opts->rootDir;
   VLOG(1) << "Fuse arguments: " << encfsArgs->toString();
 
@@ -673,6 +749,12 @@ int main(int argc, char *argv[]) {
       // keep around a pointer just in case we end up needing it to
       // report a fatal condition later (fuse_main exits unexpectedly)...
       oldStderr = _dup(STDERR_FILENO);
+
+      FreeConsole();
+
+	  freopen("NUL", "r", stdin);
+	  freopen("NUL", "w", stdout);
+	  freopen("NUL", "w", stderr);
     }
 
     try {

@@ -69,7 +69,7 @@ Section "encfs" SEC04
   SectionIn RO
   
   # Install files
-  FIle "win\dialog-password.ico"
+  File "win\dialog-password.ico"
   File "Release\encfs.exe"
   File "Release\encfsctl.exe"
   File "Release\encfsw.exe"
