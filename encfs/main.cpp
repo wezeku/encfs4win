@@ -554,6 +554,20 @@ int main(int argc, char *argv[]) {
   encfs::initLogging();
 
 #if defined(WIN32)
+
+  // Ensure the dokan library exists beforehand 
+  HINSTANCE hinstLib;
+#ifdef USE_LEGACY_DOKAN
+  hinstLib = LoadLibrary(TEXT("dokan.dll"));
+#else
+  hinstLib = LoadLibrary(TEXT("dokan1.dll"));
+#endif
+  if (hinstLib == NULL) {
+    RLOG(ERROR) << "ERROR: Unable to load Dokan FUSE library";
+    return EXIT_FAILURE;
+  }
+  FreeLibrary(hinstLib);
+
   SetConsoleCP(65001); // set utf-8
   encfs::init_mpool_mutex();
 
