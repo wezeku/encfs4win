@@ -58,7 +58,7 @@ Encfs4win works on:
 
 I will try to keep this updated with the [EncFS project](https://github.com/vgough/encfs) as changes come in upstream.  
 
-EncFS4win has been successfully tested with the original release of Dokan (v0.7.x) as well as the latest Dokan (v1.x.x).  
+EncFS4win has been successfully built against the original release of Dokan (v0.7.x) as well as the latest Dokan (v1.x.x).  
 
 ## Credits
 
