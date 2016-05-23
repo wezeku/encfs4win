@@ -63,7 +63,7 @@ void Drive::Mount(HWND hwnd)
 
   // mount using a sort of popen
   TCHAR cmd[2048];
-  _sntprintf(cmd, LENGTH(cmd), _T("\"%s\" -S \"%s\" %c:"), executable, dir.c_str(), mnt[0]);
+  _sntprintf(cmd, LENGTH(cmd), _T("\"%s\" -S -f \"%s\" %c:"), executable, dir.c_str(), mnt[0]);
   std::shared_ptr<SubProcessInformations> proc(new SubProcessInformations);
   proc->creationFlags = CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW;
   if (!CreateSubProcess(cmd, proc.get())) {
