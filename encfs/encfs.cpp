@@ -227,7 +227,7 @@ int encfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 #if defined(fuse_fill_dir_flags)
         if (filler(buf, name.c_str(), &st, 0, 0)) break;
 #else
-        if (filler(buf, name.c_str(), &st, 0)) break;
+        if (filler(buf, name.c_str(), NULL, 0)) break;
 #endif
 
         name = dt.nextPlaintextName(&fileType, &inode);
