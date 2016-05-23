@@ -474,11 +474,11 @@ static int copyContents(const std::shared_ptr<EncFS_Root> &rootInfo,
     cerr << "unable to open " << encfsName << "\n";
     return EXIT_FAILURE;
   } else {
-	struct stat_st st;
+    struct stat_st st;
 
     if (node->getAttr(&st) != 0) return EXIT_FAILURE;
 
-    if ((st.st_mode & S_IFLNK) == S_IFLNK) {
+    if ((st.st_mode & S_IFMT) == S_IFLNK) {
       string d = rootInfo->root->cipherPath(encfsName);
       char linkContents[PATH_MAX + 2];
 
@@ -492,7 +492,7 @@ static int copyContents(const std::shared_ptr<EncFS_Root> &rootInfo,
         return EXIT_FAILURE;
       }
     } else {
-      int outfd = _creat(targetName, st.st_mode);
+      int outfd = _creat(targetName, _S_IREAD | _S_IWRITE);
 
       WriteOutput output(outfd);
       processContents(rootInfo, encfsName, output);
@@ -521,7 +521,7 @@ static int traverseDirs(const std::shared_ptr<EncFS_Root> &rootInfo,
         rootInfo->root->lookupNode(volumeDir.c_str(), "encfsctl");
     if (dirNode->getAttr(&st)) return EXIT_FAILURE;
 
-	unix::mkdir(destDir.c_str(), st.st_mode);
+    unix::mkdir(destDir.c_str(), st.st_mode);
   }
 
   // show files in directory
@@ -536,7 +536,7 @@ static int traverseDirs(const std::shared_ptr<EncFS_Root> &rootInfo,
         string destName = destDir + name;
 
         int r = EXIT_SUCCESS;
-		struct stat_st stBuf;
+        struct stat_st stBuf;
         if (!unix::lstat(cpath.c_str(), &stBuf)) {
           if (S_ISDIR(stBuf.st_mode)) {
             traverseDirs(rootInfo, (plainPath + '/').c_str(), destName + '/');
