@@ -766,11 +766,27 @@ int main(int argc, char *argv[]) {
       // report a fatal condition later (fuse_main exits unexpectedly)...
       oldStderr = _dup(STDERR_FILENO);
 
+      // Let go of the console (disables CTRL signals, etc.) 
       FreeConsole();
 
-	  freopen("NUL", "r", stdin);
-	  freopen("NUL", "w", stdout);
-	  freopen("NUL", "w", stderr);
+      // Create TMP file to log output to 
+      TCHAR tmpPathBuff[MAX_PATH];
+      if (!GetTempPath(MAX_PATH, tmpPathBuff)) {
+        cerr << _("Failed to find valid TMP directory for logging.\n");
+        return EXIT_FAILURE;
+      }
+      TCHAR tmpFileName[MAX_PATH];
+      if (!GetTempFileName(tmpPathBuff, "encfs4win", 0, tmpFileName)) {
+        cerr << _("Failed to create TMP file for logging.\n");
+        return EXIT_FAILURE;
+      }
+
+      // Redirect stdout/stderr to log file 
+      freopen(tmpFileName, "w", stdout);
+      freopen(tmpFileName, "w", stderr);
+
+      // Turn off stdin 
+      freopen("NUL", "r", stdin);
     }
 
     try {
