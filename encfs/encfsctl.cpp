@@ -619,7 +619,7 @@ static int cmd_showcruft(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
-static int do_chpasswd(PasswordSource passSrc, bool annotate, bool checkOnly, int argc,
+static int do_chpasswd(bool useStdin, bool annotate, bool checkOnly, int argc,
                        char **argv) {
   (void)argc;
   string rootDir = argv[1];
@@ -645,7 +645,7 @@ static int do_chpasswd(PasswordSource passSrc, bool annotate, bool checkOnly, in
   // ask for existing password
   cout << _("Enter current Encfs password\n");
   if (annotate) cerr << "$PROMPT$ passwd" << endl;
-  CipherKey userKey = config->getUserKey(passSrc, NULL, 0);
+  CipherKey userKey = config->getUserKey(useStdin);
   if (!userKey) return EXIT_FAILURE;
 
   // decode volume key using user key -- at this point we detect an incorrect
@@ -668,9 +668,9 @@ static int do_chpasswd(PasswordSource passSrc, bool annotate, bool checkOnly, in
   // reinitialize salt and iteration count
   config->kdfIterations = 0;  // generate new
 
-  if (passSrc == Pass_Stdin) {
+  if (useStdin) {
     if (annotate) cerr << "$PROMPT$ new_passwd" << endl;
-    userKey = config->getUserKey(Pass_Stdin, NULL, 0);
+    userKey = config->getUserKey(true);
   } else
     userKey = config->getNewUserKey();
 
@@ -704,15 +704,15 @@ static int do_chpasswd(PasswordSource passSrc, bool annotate, bool checkOnly, in
 }
 
 static int chpasswd(int argc, char **argv) {
-  return do_chpasswd(Pass_Prompt, false, false, argc, argv);
+  return do_chpasswd(false, false, false, argc, argv);
 }
 
 static int chpasswdAutomaticly(int argc, char **argv) {
-  return do_chpasswd(Pass_Stdin, false, false, argc, argv);
+  return do_chpasswd(true, false, false, argc, argv);
 }
 
 static int ckpasswdAutomaticly(int argc, char **argv) {
-  return do_chpasswd(Pass_Stdin, false, true, argc, argv);
+  return do_chpasswd(true, false, true, argc, argv);
 }
 
 int main(int argc, char **argv) {

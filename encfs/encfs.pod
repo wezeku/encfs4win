@@ -22,7 +22,6 @@ B<encfs> [B<--version>] [B<-s>] [B<-f>] [B<-v>|B<--verbose>]
 [B<-d>|B<--fuse-debug>] [B<--public>] [B<--no-default-flags>]
 [B<--ondemand>] [B<--delaymount>] [B<--reverse>] [B<--standard>] [B<--paranoia>]
 [B<--require-macs>] [B<--nocache>] [B<--mount>] [B<--config=path>] 
-[B<--password=pass>]
 [B<-o FUSE_OPTION>]
 I<rootdir> I<mountPoint> 
 [B<--> [I<Fuse Mount Options>]]
@@ -268,17 +267,6 @@ used with B<--mount> and must only specify I<mountPoint>.
 
 Specifies which config file to use, overriding environment variable ENCFS6_CONFIG.  Refer 
 to the warnings specified by I<ENCFS6_CONFIG> below. 
-
-=item B<--password=passwd>
-
-Allows supplying of the password from the command line. If passwd contains spaces, 
-it must be enclosed in quotation marks.  B<Warning>: This method of supplying a password 
-may be insecure! (e.g., command prompt history is logged)
-
-For example, this option can be combined with --paranoia or --standard to quickly 
-create an encrypted filesystem without prompting: 
-
-    encfs --standard --password=abc /home/me /tmp/crypt-view
 
 =back
 

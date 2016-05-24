@@ -40,8 +40,6 @@ enum ConfigType {
   Config_V6
 };
 
-enum PasswordSource { Pass_Prompt, Pass_Stdin, Pass_Cmd, Pass_Ext };
-
 struct EncFS_Opts;
 class Cipher;
 class NameIO;
@@ -92,10 +90,9 @@ struct EncFSConfig {
     desiredKDFDuration = 500;
   }
 
-  CipherKey getUserKey(const std::shared_ptr<EncFS_Opts> &opts);
+  CipherKey getUserKey(bool useStdin);
   CipherKey getUserKey(const std::string &passwordProgram,
                        const std::string &rootDir);
-  CipherKey getUserKey(const PasswordSource passSrc, char *pass, const int passBuffLen);
   CipherKey getNewUserKey();
 
   std::shared_ptr<Cipher> getCipher() const;

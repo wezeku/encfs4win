@@ -68,6 +68,9 @@ using gnu::autosprintf;
 namespace encfs {
 
 static const int DefaultBlockSize = 1024;
+// The maximum length of text passwords.  If longer are needed,
+// use the extpass option, as extpass can return arbitrary length binary data.
+static const int MaxPassBuf = 512;
 
 static const int NormalKDFDuration = 500;     // 1/2 a second
 static const int ParanoiaKDFDuration = 3000;  // 3 seconds
@@ -966,6 +969,7 @@ RootPtr createV6Config(EncFS_Context *ctx,
   bool enableIdleTracking = opts->idleTracking;
   bool forceDecode = opts->forceDecode;
   const std::string passwordProgram = opts->passwordProgram;
+  bool useStdin = opts->useStdin;
   bool reverseEncryption = opts->reverseEncryption;
   ConfigMode configMode = opts->configMode;
   bool annotate = opts->annotate;
@@ -1171,12 +1175,11 @@ RootPtr createV6Config(EncFS_Context *ctx,
 
   // get user key and use it to encode volume key
   CipherKey userKey;
-  VLOG(1) << "passSrc: " << opts->passSrc;
-  if (opts->passSrc == Pass_Cmd || opts->passSrc == Pass_Stdin) {
+  VLOG(1) << "useStdin: " << useStdin;
+  if (useStdin) {
     if (annotate) cerr << "$PROMPT$ new_passwd" << endl;
-    userKey = config->getUserKey(opts);
-  } else if (opts->passSrc == Pass_Ext)
-    userKey = config->getUserKey(passwordProgram, rootDir);
+    userKey = config->getUserKey(useStdin);
+  } 
   else
     userKey = config->getNewUserKey();
 
@@ -1384,27 +1387,16 @@ CipherKey EncFSConfig::makeKey(const char *password, int passwdLen) {
   return userKey;
 }
 
-CipherKey EncFSConfig::getUserKey(const std::shared_ptr<EncFS_Opts> &opts) {
-  return getUserKey(opts->passSrc, opts->pass, sizeof(opts->pass));
-}
-CipherKey EncFSConfig::getUserKey(const PasswordSource passSrc, char *pass, const int passBuffLen) {
+CipherKey EncFSConfig::getUserKey(bool useStdin) {
   char passBuf[MaxPassBuf];
-  char *res = NULL;
+  char *res;
 
-  if (passSrc == Pass_Cmd && pass != NULL) {
-    if (strlen(pass) > 0) {
-      res = strncpy(passBuf, pass, sizeof(passBuf));
-      passBuf[sizeof(passBuf) - 1] = '\0'; // force null-termination 
-      memset(pass, 0, passBuffLen);
-    }
-  }
-  else if (passSrc == Pass_Stdin) {
+  if (useStdin) {
     res = fgets(passBuf, sizeof(passBuf), stdin);
     // Kill the trailing newline.
     if (passBuf[strlen(passBuf) - 1] == '\n')
       passBuf[strlen(passBuf) - 1] = '\0';
-  }
-  else {
+  } else {
     // xgroup(common)
     res = readpassphrase(_("EncFS Password: "), passBuf, sizeof(passBuf),
                          RPP_ECHO_OFF);
@@ -1589,12 +1581,11 @@ RootPtr initFS(EncFS_Context *ctx, const std::shared_ptr<EncFS_Opts> &opts) {
     // get user key
     CipherKey userKey;
 
-    if (opts->passSrc != Pass_Ext) {
-      VLOG(1) << "passSrc: " << opts->passSrc;
+    if (opts->passwordProgram.empty()) {
+      VLOG(1) << "useStdin: " << opts->useStdin;
       if (opts->annotate) cerr << "$PROMPT$ passwd" << endl;
-      userKey = config->getUserKey(opts);
-    } else
-      userKey = config->getUserKey(opts->passwordProgram, opts->rootDir);
+      userKey = config->getUserKey(opts->useStdin);
+    } 
 
     if (!userKey) return rootInfo;
 

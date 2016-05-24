@@ -89,6 +89,7 @@ struct EncFS_Args {
     if (opts->checkKey) ss << "(keyCheck) ";
     if (opts->forceDecode) ss << "(forceDecode) ";
     if (opts->ownerCreate) ss << "(ownerCreate) ";
+    if (opts->useStdin) ss << "(useStdin) ";
     if (opts->annotate) ss << "(annotate) ";
     if (opts->reverseEncryption) ss << "(reverseEncryption) ";
     if (opts->mountOnDemand) ss << "(mountOnDemand) ";
@@ -155,11 +156,6 @@ static void usage(const char *name) {
        << _("  --config=path\t\t"
             "specifies config file (overrides ENV variable)\n")
 
-       << _("  --password=passwd\t"
-            "specifies password. use quotes if pass contains \n"
-            "\t\t\tspaces. Warning: may be unsafe if command \n"
-            "\t\t\tprompt history is logged!\n")
-
        // xgroup(usage)
        << _("  --extpass=program\tUse external program for password prompt\n"
             "\n"
@@ -206,7 +202,7 @@ static bool processArgs(int argc, char *argv[],
   out->opts->checkKey = true;
   out->opts->forceDecode = false;
   out->opts->ownerCreate = false;
-  out->opts->passSrc = Pass_Prompt;
+  out->opts->useStdin = false;
   out->opts->annotate = false;
   out->opts->reverseEncryption = false;
   out->opts->requireMac = false;
@@ -250,7 +246,6 @@ static bool processArgs(int argc, char *argv[],
       { "mount", 0, 0, LONG_OPT_MOUNT },  // only mount 
       { "unmount", 0, 0, LONG_OPT_UNMOUNT },  // only unmount 
       { "config", 1, 0, LONG_OPT_CONFIG },  // command-line-supplied config location 
-      { "password", 1, 0, LONG_OPT_PASSWORD },  // command-line-supplied password 
       {0, 0, 0, 0}};
 
   while (1) {
@@ -280,7 +275,7 @@ static bool processArgs(int argc, char *argv[],
         out->isThreaded = false;
         break;
       case 'S':
-        out->opts->passSrc = Pass_Stdin;
+        out->opts->useStdin = true;
         break;
       case LONG_OPT_ANNOTATE:
         out->opts->annotate = true;
@@ -363,16 +358,6 @@ static bool processArgs(int argc, char *argv[],
          * line instead of ENV variable */
         out->opts->config.assign(optarg);
         break;
-      case LONG_OPT_PASSWORD:
-        /* Take password from command line 
-         * options (not stdin or prompt) */
-        if (strlen(optarg) > 0) {
-          strncpy(out->opts->pass, optarg, sizeof(out->opts->pass));
-          out->opts->pass[sizeof(out->opts->pass) - 1] = '\0'; // force null-termination 
-          out->opts->passSrc = Pass_Cmd;
-          memset(optarg, 0, strlen(optarg));
-        }
-        break;
       case 'N':
         useDefaultFlags = false;
         break;
@@ -381,7 +366,6 @@ static bool processArgs(int argc, char *argv[],
         PUSHARG(optarg);
         break;
       case 'p':
-        out->opts->passSrc = Pass_Ext;
         out->opts->passwordProgram.assign(optarg);
         break;
       case 'P':

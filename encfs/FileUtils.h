@@ -39,13 +39,8 @@
 #define LONG_OPT_MOUNT 516
 #define LONG_OPT_UNMOUNT 517
 #define LONG_OPT_CONFIG 518
-#define LONG_OPT_PASSWORD 519
 
 namespace encfs {
-  
-// The maximum length of text passwords.  If longer are needed,
-// use the extpass option, as extpass can return arbitrary length binary data.
-static const int MaxPassBuf = 512;
 
 // true if the path points to an existing node (of any type)
 bool fileExists(const char *fileName);
@@ -97,8 +92,7 @@ struct EncFS_Opts {
   bool forceDecode;  // force decode on MAC block failures
 
   std::string passwordProgram;  // path to password program (or empty)
-  PasswordSource passSrc;  // where to pull password data from 
-  char pass[MaxPassBuf] = {0};   // password (pulled in from command line) 
+  bool useStdin;  // read password from stdin rather then prompting
   bool annotate;  // print annotation line prompt to stderr.
 
   bool ownerCreate;  // set owner of new files to caller
@@ -125,7 +119,7 @@ struct EncFS_Opts {
     unmount = false;
     checkKey = true;
     forceDecode = false;
-    passSrc = Pass_Prompt;
+    useStdin = false;
     annotate = false;
     ownerCreate = false;
     reverseEncryption = false;
