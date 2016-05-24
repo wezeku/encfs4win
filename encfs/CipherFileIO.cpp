@@ -384,7 +384,7 @@ bool CipherFileIO::writeOneBlock(const IORequest &req) {
 
 bool CipherFileIO::blockWrite(unsigned char *buf, int size,
                               uint64_t _iv64) const {
-  VLOG(1) << "Called blockWrite";
+  //VLOG(1) << "Called blockWrite";
   if (!fsConfig->reverseEncryption)
     return cipher->blockEncode(buf, size, _iv64, key);
   else
@@ -393,7 +393,7 @@ bool CipherFileIO::blockWrite(unsigned char *buf, int size,
 
 bool CipherFileIO::streamWrite(unsigned char *buf, int size,
                                uint64_t _iv64) const {
-  VLOG(1) << "Called streamWrite";
+  //VLOG(1) << "Called streamWrite";
   if (!fsConfig->reverseEncryption)
     return cipher->streamEncode(buf, size, _iv64, key);
   else
@@ -457,8 +457,8 @@ ssize_t CipherFileIO::read(const IORequest &origReq) const {
   /* if reverse mode is not active with uniqueIV,
    * the read request is handled by the base class */
   if (!(fsConfig->reverseEncryption && haveHeader)) {
-    VLOG(1) << "relaying request to base class: offset=" << origReq.offset
-            << ", dataLen=" << origReq.dataLen;
+    /*VLOG(1) << "relaying request to base class: offset=" << origReq.offset
+            << ", dataLen=" << origReq.dataLen;*/
     return BlockFileIO::read(origReq);
   }
 

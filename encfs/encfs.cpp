@@ -126,7 +126,7 @@ static int withFileNode(const char *opName, const char *path,
 
     auto do_op = [&FSRoot, opName, &op](FileNode *fnode) {
       rAssert(fnode != nullptr);
-      VLOG(1) << "op: " << opName << " : " << fnode->cipherName();
+      //VLOG(1) << "op: " << opName << " : " << fnode->cipherName();
 
       // check that we're not recursing into the mount point itself
       if (FSRoot->touchesMountpoint(fnode->cipherName())) {
@@ -540,7 +540,7 @@ bool isFileReadOnly(const char *path) {
 		struct stat_st stbuf;
 		int res = node->getAttr(&stbuf);
 		rAssert(res == 0);
-		VLOG(1) << "Mode: %lo (octal)\n", (unsigned long)stbuf.st_mode;
+		//VLOG(1) << "Mode: %lo (octal)\n", (unsigned long)stbuf.st_mode;
 
 		// No write permissions? 
 		if (S_ISREG(stbuf.st_mode) && !(_S_IWRITE & stbuf.st_mode)) {

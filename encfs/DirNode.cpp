@@ -664,7 +664,7 @@ std::shared_ptr<FileNode> DirNode::findOrCreate(const char *plainName) {
 
     if (fsConfig->config->externalIVChaining) node->setName(0, 0, iv);
 
-    VLOG(1) << "created FileNode for " << node->cipherName();
+    //VLOG(1) << "created FileNode for " << node->cipherName();
   }
 
   return node;
