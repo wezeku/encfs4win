@@ -1179,7 +1179,8 @@ RootPtr createV6Config(EncFS_Context *ctx,
   if (useStdin) {
     if (annotate) cerr << "$PROMPT$ new_passwd" << endl;
     userKey = config->getUserKey(useStdin);
-  } 
+  } else if (!passwordProgram.empty())
+    userKey = config->getUserKey(passwordProgram, rootDir);
   else
     userKey = config->getNewUserKey();
 
@@ -1585,7 +1586,8 @@ RootPtr initFS(EncFS_Context *ctx, const std::shared_ptr<EncFS_Opts> &opts) {
       VLOG(1) << "useStdin: " << opts->useStdin;
       if (opts->annotate) cerr << "$PROMPT$ passwd" << endl;
       userKey = config->getUserKey(opts->useStdin);
-    } 
+    } else
+      userKey = config->getUserKey(opts->passwordProgram, opts->rootDir);
 
     if (!userKey) return rootInfo;
 
