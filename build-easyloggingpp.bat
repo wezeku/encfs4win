@@ -65,6 +65,8 @@ git clean -ffdx
 git reset --hard %VERSION%
 git checkout %VERSION%
 
+REM Patch bug in toFile 
+git apply ../easyloggingpp.patch
 
 REM verify necessary libraries were successfully installed  
 if NOT exist "%INSTALL_DIR%\src\easylogging++.h" goto :build_failure
