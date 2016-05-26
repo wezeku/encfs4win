@@ -86,7 +86,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(DOKAN_ROOT)\Win32\Release\dokan1.lib;$(DOKAN_ROOT)\Win32\Release\dokanfuse1.lib;$(OPENSSL_ROOT)\lib\libeay32.lib;$(OPENSSL_ROOT)\lib\ssleay32.lib;..\deps\tinyxml2\tinyxml2\bin\Win32-Debug-Lib\tinyxml2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(DOKAN_ROOT)\Win32\Debug\dokan1.lib;$(DOKAN_ROOT)\Win32\Debug\dokanfuse1.lib;$(OPENSSL_ROOT)\lib\libeay32.lib;$(OPENSSL_ROOT)\lib\ssleay32.lib;..\deps\tinyxml2\tinyxml2\bin\Win32-Debug-Lib\tinyxml2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
