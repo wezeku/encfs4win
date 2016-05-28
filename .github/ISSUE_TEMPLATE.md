@@ -1,20 +1,17 @@
-Please use the following template for bug reports, and be sure you are using the latest version of the software. 
-
 # Environment
  * Windows version: 
  * Processor architecture: 
  * Encfs4win version: 
  * Dokan version (legacy, modern): 
 
-
-# Expected behavior
-
-
-# Actual behavior
+# Description 
 
 
-# Steps to reproduce problem
+## Expected behavior vs. actual behavior 
 
+
+## Steps to reproduce problem
+1. 
 
 # Relevant logs
 
