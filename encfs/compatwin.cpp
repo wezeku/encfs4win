@@ -517,7 +517,7 @@ int
 unix::rename(const char *oldpath, const char *newpath)
 {
 	//VLOG(1) << "NOTIFY -- unix::rename";
-	if (MoveFileW(utf8_to_wfn(oldpath).c_str(), utf8_to_wfn(newpath).c_str()))
+	if (MoveFileExW(utf8_to_wfn(oldpath).c_str(), utf8_to_wfn(newpath).c_str(), MOVEFILE_COPY_ALLOWED))
 		return 0;
 	errno = ERRNO_FROM_WIN32(GetLastError());
 	return -1;
